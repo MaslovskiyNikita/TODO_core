@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    command: ["./entrypoint.sh"]  
     volumes:
       - .:/app
     ports:
@@ -14,7 +15,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: ["./entrypoint.sh"]
 
   db:
     image: postgres:16
