@@ -24,9 +24,13 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 2.0.1
+
       - name: Install dependencies
         run: |
-          pip install poetry
           poetry install --no-root
 
       - name: Run pre-commit

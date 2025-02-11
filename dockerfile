@@ -19,7 +19,7 @@ COPY pyproject.toml poetry.lock ./
 RUN poetry install --no-root
 
 
-FROM python:3.12-slim
+FROM builder
 
 
 RUN apt-get update && apt-get install -y \
@@ -39,6 +39,3 @@ ENV PYTHONUNBUFFERED 1
 
 
 COPY . .
-
-
-ENTRYPOINT ["./entrypoint.sh"]
