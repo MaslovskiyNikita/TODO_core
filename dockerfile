@@ -1,27 +1,43 @@
-FROM python:3.12-slim
+FROM python:3.12-slim AS builder
+
 
 RUN apt-get update && apt-get install -y \
     gcc \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Устанавливаем Poetry
+
 RUN pip install poetry
 
-# Устанавливаем рабочую директорию
+
 WORKDIR /app
 
-# Копируем файлы проекта
+
 COPY pyproject.toml poetry.lock ./
 
-# Устанавливаем зависимости через Poetry
+
 RUN poetry install --no-root
 
-# Копируем остальную часть проекта
-COPY . .
 
-# Устанавливаем переменные окружения
+FROM python:3.12-slim
+
+
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+
+WORKDIR /app
+
+
+COPY --from=builder /root/.cache /root/.cache
+COPY --from=builder /app /app
+
+
 ENV PYTHONUNBUFFERED 1
 
-# Запускаем скрипт entrypoint
+
+COPY . .
+
+
 ENTRYPOINT ["./entrypoint.sh"]
