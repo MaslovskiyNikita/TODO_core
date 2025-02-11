@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install poetry
-          poetry install -no--root
+          poetry install --no-root
 
       - name: Run pre-commit
         run: |
