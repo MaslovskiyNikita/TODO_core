@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - features/setup
+  pull_request:
+    branches:
+      - main
+      - dev
+      - features/setup
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - uses: actions/checkout@v4
+      - uses: isort/isort-action@v1
+
+      - name: Run black
+        uses: psf/black@stable
+
+      - name: Run mypy
+        uses: sasanquaneuf/mypy-github-action@releases/v1
+        with:
+          checkName: 'mypy'
+
