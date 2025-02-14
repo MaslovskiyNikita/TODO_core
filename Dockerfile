@@ -26,7 +26,6 @@ RUN pip install poetry
 
 WORKDIR /app
 
-COPY --from=builder /root/.cache /root/.cache
 COPY --from=builder /app /app
 
 COPY . .
