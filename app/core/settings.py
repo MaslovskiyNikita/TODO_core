@@ -46,8 +46,6 @@ INSTALLED_APPS = [
     "core",
     "projects",
     "tasks",
-    "models.project_models",
-    "models.task_models",
 ]
 
 MIDDLEWARE = [
