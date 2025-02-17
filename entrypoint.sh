@@ -1,8 +1,6 @@
 #!/bin/sh
 
-poetry run python app/manage.py makemigrations core
-poetry run python app/manage.py makemigrations tasks
-poetry run python app/manage.py makemigrations projects
+poetry run python app/manage.py makemigrations
 
 poetry run python app/manage.py migrate
 
