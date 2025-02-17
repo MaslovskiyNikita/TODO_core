@@ -1,7 +1,8 @@
 import uuid
 
 from django.db import models
-from project_model import Project
+
+from .project_model import Project
 
 
 class ProjectMember(models.Model):
