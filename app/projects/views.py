@@ -1,31 +1,35 @@
 from rest_framework import status, viewsets
-from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models.project_model import Project
+from .permissions import IsUserAdmin
 from .serializer import ProjectSerializer
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
+    permission_classes = [IsUserAdmin]
 
-    @action(detail=False, methods=["delete"])
-    def delete_all(self, request):
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy()
+        if request.user.is_authenticated:
+            data["owner"] = request.user.id
+        else:
+            data["owner"] = None
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        count, _ = Project.objects.all().delete()
-        return Response(
-            {"detail": f"{count} projects deleted."}, status=status.HTTP_204_NO_CONTENT
-        )
+    def update(self, request, *args, **kwargs):
+        project = self.get_object()
+        if project.owner != request.user.id and not request.user.is_staff:
+            raise PermissionDenied("You do not have permission to edit this project.")
+        return super().update(request, *args, **kwargs)
 
-    @action(detail=True, methods=["get"])
-    def project_id(self, request, pk=None):
-
-        try:
-            project = self.get_object()
-            serializer = self.get_serializer(project)
-            return Response(serializer.data)
-        except Project.DoesNotExist:
-            return Response(
-                {"detail": "Project not found."}, status=status.HTTP_404_NOT_FOUND
-            )
+    def destroy(self, request, *args, **kwargs):
+        project = self.get_object()
+        if project.owner != request.user.id and not request.user.is_staff:
+            raise PermissionDenied("You do not have permission to delete this project.")
+        return super().destroy(request, *args, **kwargs)
