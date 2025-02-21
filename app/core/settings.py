@@ -66,7 +66,10 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework.authentication.TokenAuthentication",
     ),
-    "DEFAULT_PERMISSION_CLASSES": ("projects.permissions.IsUserAdmin",),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "projects.permissions.IsUserAdmin",
+        "projects.permissions.IsUserAdminOrOwner",
+    ),
 }
 
 

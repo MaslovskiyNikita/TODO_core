@@ -1,7 +1,16 @@
+from dataclasses import dataclass
+
 import jwt
-from django.conf import settings
 from django.http import JsonResponse
 from rest_framework.authentication import get_authorization_header
+
+
+@dataclass
+class UserData:
+    sub: str
+    name: str
+    uuid: str
+    role: str
 
 
 class JWTAuthenticationMiddleware:
@@ -11,15 +20,18 @@ class JWTAuthenticationMiddleware:
     def __call__(self, request):
         auth_header = get_authorization_header(request).decode("utf-8")
 
-        print(auth_header)
         if auth_header and auth_header.startswith("Bearer "):
             token = auth_header.split(" ")[1]
             try:
-                decoded_token = jwt.decode(token, "pizda", algorithms=["HS256"])
+                decoded_token = jwt.decode(token, "Nikita", algorithms=["HS256"])
 
-                request.data_user = {
-                    "is_staff": True,
-                }
+                request.data_user = UserData(
+                    sub=decoded_token["sub"],
+                    name=decoded_token["name"],
+                    uuid=decoded_token["uuid"],
+                    role=decoded_token["role"],
+                )
+
             except jwt.ExpiredSignatureError:
                 return JsonResponse({"detail": "Token has expired."}, status=401)
             except jwt.InvalidTokenError:
