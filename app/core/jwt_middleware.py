@@ -7,10 +7,10 @@ from rest_framework.authentication import get_authorization_header
 
 @dataclass
 class UserData:
-    sub: str
     name: str
     uuid: str
     role: str
+    permission: list
 
 
 class JWTAuthenticationMiddleware:
@@ -26,10 +26,10 @@ class JWTAuthenticationMiddleware:
                 decoded_token = jwt.decode(token, "Nikita", algorithms=["HS256"])
 
                 request.data_user = UserData(
-                    sub=decoded_token["sub"],
                     name=decoded_token["name"],
                     uuid=decoded_token["uuid"],
                     role=decoded_token["role"],
+                    permission=decoded_token["permission"],
                 )
 
             except jwt.ExpiredSignatureError:

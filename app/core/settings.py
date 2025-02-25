@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "django_filters",
     "core",
     "projects",
     "tasks",
@@ -67,9 +68,10 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
-        "projects.permissions.IsUserAdmin",
-        "projects.permissions.IsUserAdminOrOwner",
+        "permissions.IsUserAdminOrOwner.IsUserAdminOrOwner",
     ),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,
 }
 
 

@@ -1,8 +1,13 @@
+from permissions.IsUserAdminOrOwner import (
+    IsUserAdminOrOwner,
+    IsUserCanDelete,
+    IsUserCanUpdate,
+)
 from rest_framework import status, viewsets
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models.project_model import Project
-from .permissions import IsUserAdmin, IsUserAdminOrOwner
 from .serializer import ProjectSerializer
 
 
@@ -11,12 +16,14 @@ class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
 
     def get_permissions(self):
-
         current_action = self.action
 
-        if current_action in ["create", "update", "destroy", "partial_update"]:
-            permission_classes = [IsUserAdminOrOwner]
+        if current_action in ["update", "partial_update"]:
+            permission_classes = [IsUserAdminOrOwner | IsUserCanUpdate]
+        elif current_action in ["destroy"]:
+            permission_classes = [IsUserCanDelete | IsUserAdminOrOwner]
         else:
+            # permission_classes = [IsAuthenticated]
             permission_classes = []
 
         return [permission() for permission in permission_classes]
@@ -30,9 +37,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
-        project = self.get_object()
         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        project = self.get_object()
         return super().destroy(request, *args, **kwargs)
