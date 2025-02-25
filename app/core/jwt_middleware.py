@@ -1,16 +1,12 @@
-from dataclasses import dataclass
+import os
 
 import jwt
+from core.DataClasses.UserDataClass import UserData
 from django.http import JsonResponse
+from dotenv import load_dotenv
 from rest_framework.authentication import get_authorization_header
 
-
-@dataclass
-class UserData:
-    name: str
-    uuid: str
-    role: str
-    permission: list
+load_dotenv()
 
 
 class JWTAuthenticationMiddleware:
@@ -23,9 +19,11 @@ class JWTAuthenticationMiddleware:
         if auth_header and auth_header.startswith("Bearer "):
             token = auth_header.split(" ")[1]
             try:
-                decoded_token = jwt.decode(token, "Nikita", algorithms=["HS256"])
+                decoded_token = jwt.decode(
+                    token, os.getenv("SECRET_KEY", "Nikita"), algorithms=["HS256"]
+                )
 
-                request.data_user = UserData(
+                request.user_data = UserData(
                     name=decoded_token["name"],
                     uuid=decoded_token["uuid"],
                     role=decoded_token["role"],

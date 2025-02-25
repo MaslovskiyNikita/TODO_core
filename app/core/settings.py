@@ -67,9 +67,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework.authentication.TokenAuthentication",
     ),
-    "DEFAULT_PERMISSION_CLASSES": (
-        "permissions.IsUserAdminOrOwner.IsUserAdminOrOwner",
-    ),
+    "DEFAULT_PERMISSION_CLASSES": ("permissions.permissions_core.IsUserAdminOrOwner",),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
 }

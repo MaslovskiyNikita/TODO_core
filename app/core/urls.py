@@ -1,7 +1,7 @@
 from django.urls import include, path
-from projects.views import ProjectViewSet
+from projects.views.views_projects import ProjectViewSet
 from rest_framework.routers import DefaultRouter
-from tasks.views import TaskListCreate
+from tasks.views.views_tasks import TaskListCreate
 
 router = DefaultRouter()
 router.register("projects", ProjectViewSet)

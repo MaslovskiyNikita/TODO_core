@@ -1,5 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from permissions.IsUserAdminOrOwner import (
+from permissions.permissions_core import (
     IsUserAdminOrOwner,
     IsUserCanDelete,
     IsUserCanUpdate,
@@ -8,15 +8,16 @@ from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .filter import TaskFilter
-from .models.task_model import Task
-from .serializer import TaskSerializer
+from ..filter import TaskFilter
+from ..models.task_model import Task
+from ..serializators.serializer import TaskSerializer
 
 
 class TaskListCreate(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    filterset_fields = ["project", "assigned_to", "status"]
+    filterset_class = TaskFilter
+    filter_backends = (DjangoFilterBackend,)
     ordering_fields = ["created_at", "title"]
     ordering = ["created_at"]
 
