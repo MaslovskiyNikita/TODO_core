@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-f^49&ouw)z-5g_hziv1bwb=p$%%fr3u4@h46*6(9t8%vh=bez!"
+# SECRET_KEY = "django-insecure-f^49&ouw)z-5g_hziv1bwb=p$%%fr3u4@h46*6(9t8%vh=bez!"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -64,10 +64,9 @@ MIDDLEWARE = [
 ]
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework.authentication.TokenAuthentication",
+    "DEFAULT_permissions_CLASSES": (
+        "permissionss.permissionss_core.IsUserAdminOrOwner",
     ),
-    "DEFAULT_PERMISSION_CLASSES": ("permissions.permissions_core.IsUserAdminOrOwner",),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
 }
@@ -92,6 +91,9 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "core.wsgi.application"
+
+SECRET_KEY = os.getenv("SECRET_KEY", "Nikita")
+ALGORITMS = os.getenv("ALGORITMS", "HS256")
 
 
 # Database

@@ -1,9 +1,10 @@
 from dataclasses import dataclass
+from uuid import UUID
 
 
 @dataclass
 class UserData:
     name: str
-    uuid: str
+    uuid: UUID
     role: str
-    permission: list[str]
+    permissions: list[str]

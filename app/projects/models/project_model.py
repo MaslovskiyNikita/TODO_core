@@ -10,6 +10,7 @@ class Project(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     owner = models.UUIDField()
+    is_archived = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -21,7 +22,4 @@ class ProjectMember(models.Model):
         Project, on_delete=models.CASCADE, related_name="members"
     )
     user = models.UUIDField()
-    role = models.CharField(max_length=50)
-
-    def __str__(self):
-        return f"{self.user.username} in {self.project.name}"
+    role = models.CharField(max_length=50)  # переделать под choice field

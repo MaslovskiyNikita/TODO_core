@@ -1,7 +1,8 @@
 import os
 
 import jwt
-from core.DataClasses.UserDataClass import UserData
+from core.DataClasses.user_data import UserData
+from core.settings import ALGORITMS, SECRET_KEY
 from django.http import JsonResponse
 from dotenv import load_dotenv
 from rest_framework.authentication import get_authorization_header
@@ -19,15 +20,13 @@ class JWTAuthenticationMiddleware:
         if auth_header and auth_header.startswith("Bearer "):
             token = auth_header.split(" ")[1]
             try:
-                decoded_token = jwt.decode(
-                    token, os.getenv("SECRET_KEY", "Nikita"), algorithms=["HS256"]
-                )
+                decoded_token = jwt.decode(token, SECRET_KEY, ALGORITMS)
 
                 request.user_data = UserData(
-                    name=decoded_token["name"],
-                    uuid=decoded_token["uuid"],
-                    role=decoded_token["role"],
-                    permission=decoded_token["permission"],
+                    name=decoded_token.get("name", "user"),
+                    uuid=decoded_token.get("uuid", None),
+                    role=decoded_token.get("role", "user"),
+                    permissions=decoded_token.get("permissions", []),
                 )
 
             except jwt.ExpiredSignatureError:
