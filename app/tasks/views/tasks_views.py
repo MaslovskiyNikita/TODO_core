@@ -1,5 +1,6 @@
+from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
-from permissions.permissions_core import (
+from projects.permissions_core import (
     IsUserAdminOrOwner,
     IsUserCanDelete,
     IsUserCanUpdate,
@@ -7,6 +8,7 @@ from permissions.permissions_core import (
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from tasks.roles import Role
 
 from ..filters.filter import TaskFilter
 from ..models.task_model import Task
@@ -27,11 +29,18 @@ class TaskViews(viewsets.ModelViewSet):
         "destroy": [IsUserCanDelete | IsUserAdminOrOwner],
     }
 
+    def get_queryset(self):
+        if self.request.user_data.role == Role.ADMIN.value:
+            return Task.objects.filter(is_archived=False)
+        else:
+            return Task.objects.filter(
+                Q(subscribers__user=self.request.user_data.uuid)
+                | Q(project__owner=self.request.user_data.uuid)
+            )
+
     def get_permissions(self):
         current_action = self.action
-        if current_action in ["update", "partial_update"]:
-            permissions_classes = self.permission_class_by_action.get(current_action)
-        elif current_action in ["destroy"]:
+        if current_action in ["update", "partial_update", "destroy"]:
             permissions_classes = self.permission_class_by_action.get(current_action)
         else:
             permissions_classes = []

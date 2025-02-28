@@ -1,14 +1,13 @@
 from django.db.models import Q
-from permissions.permissions_core import (
+from projects.permissions_core import (
     IsUserAdminOrOwner,
     IsUserCanDelete,
     IsUserCanUpdate,
-    IsUserCollaborator,
 )
+from projects.roles import Role
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from roles.roles import Role
 
 from ..models.project_model import Project, ProjectMember
 from ..serializers.project_ser import ProjectSerializer
@@ -21,19 +20,12 @@ class ProjectViewSet(viewsets.ModelViewSet):
         "update": [IsAuthenticated | IsUserCanUpdate],
         "partial_update": [IsAuthenticated | IsUserCanUpdate],
         "destroy": [IsUserCanDelete | IsUserAdminOrOwner],
-        "list": [IsUserAdminOrOwner | IsUserCollaborator],
     }
 
     def get_queryset(self):
         if self.request.user_data.role == Role.ADMIN.value:
             return Project.objects.filter(is_archived=False)
         else:
-            # TODO
-            # сделать чтобы выводились или где чел является участником ИЛИ автором
-            # https://docs.djangoproject.com/en/5.1/ref/models/querysets/
-            # https://docs.djangoproject.com/en/5.1/ref/models/querysets/
-            # https://docs.djangoproject.com/en/5.1/ref/models/querysets/
-            # https://docs.djangoproject.com/en/5.1/ref/models/querysets/
             return Project.objects.filter(
                 Q(members__user=self.request.user_data.uuid)
                 | Q(owner=self.request.user_data.uuid)
@@ -41,7 +33,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         current_action = self.action
-        if current_action in ["update", "partial_update", "destroy", "list"]:
+        if current_action in ["update", "partial_update", "destroy"]:
             permissions_classes = self.permission_class_by_action.get(current_action)
         else:
             permissions_classes = []
