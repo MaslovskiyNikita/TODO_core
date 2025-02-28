@@ -1,7 +1,7 @@
 import os
 
 import jwt
-from core.DataClasses.user_data import UserData
+from core.data_classes.user import UserData
 from core.settings import ALGORITMS, SECRET_KEY
 from django.http import JsonResponse
 from dotenv import load_dotenv
