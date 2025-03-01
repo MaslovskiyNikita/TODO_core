@@ -1,6 +1,6 @@
 from enum import Enum
 
-from projects import permissions
+from api.v1.projects import permissions
 from rest_framework.permissions import IsAuthenticated
 
 

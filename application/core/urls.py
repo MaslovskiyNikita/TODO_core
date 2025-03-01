@@ -1,7 +1,7 @@
+from api.v1.projects.views.projects import ProjectViewSet
+from api.v1.tasks.views.tasks_views import TaskViews
 from django.urls import include, path
-from projects.views.projects_views import ProjectViewSet
 from rest_framework.routers import DefaultRouter
-from tasks.views.tasks_views import TaskViews
 
 router = DefaultRouter()
 router.register("projects", ProjectViewSet)

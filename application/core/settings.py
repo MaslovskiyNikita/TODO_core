@@ -60,13 +60,11 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "core.jwt_middleware.JWTAuthenticationMiddleware",
+    "jwt_middleware.JWTAuthenticationMiddleware",
 ]
 
 REST_FRAMEWORK = {
-    "DEFAULT_permissions_CLASSES": (
-        "permissionss.permissionss_core.IsUserAdminOrOwner",
-    ),
+    "DEFAULT_permissions_CLASSES": ("api.projects.permissions.IsUserAdminOrOwner",),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
 }

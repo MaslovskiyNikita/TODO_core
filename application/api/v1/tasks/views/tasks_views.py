@@ -1,16 +1,22 @@
-from core.choices.permission_pool import PermissionPool
-from core.choices.roles import Role
+from api.v1.filters import TaskFilter
+from api.v1.tasks.serializers.task import TaskSerializer
+from choices.permission_pool import PermissionPool
+from choices.roles import Role
 from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.response import Response
-
-from ..models.project_model import Project, ProjectMember
-from ..serializers.project_ser import ProjectSerializer
+from tasks.models.task_model import Task
 
 
-class ProjectViewSet(viewsets.ModelViewSet):
-    queryset = Project.objects.filter(is_archived=False)
-    serializer_class = ProjectSerializer
+class TaskViews(viewsets.ModelViewSet):
+    queryset = Task.objects.filter(is_archived=False)
+    serializer_class = TaskSerializer
+    filterset_class = TaskFilter
+    filter_backends = (DjangoFilterBackend,)
+    ordering_fields = ["created_at", "title"]
+    ordering = ["created_at"]
+
     permission_class_by_action = {
         "update": PermissionPool.UPDATE.value,
         "partial_update": PermissionPool.PARTIAL_UPDATE.value,
@@ -19,11 +25,11 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         if self.request.user_data.role == Role.ADMIN.value:
-            return Project.objects.filter(is_archived=False)
+            return Task.objects.filter(is_archived=False)
         else:
-            return Project.objects.filter(
-                Q(members__user=self.request.user_data.uuid)
-                | Q(owner=self.request.user_data.uuid)
+            return Task.objects.filter(
+                Q(subscribers__user=self.request.user_data.uuid)
+                | Q(project__owner=self.request.user_data.uuid)
             )
 
     def get_permissions(self):
@@ -34,14 +40,6 @@ class ProjectViewSet(viewsets.ModelViewSet):
             permissions_classes = []
 
         return [permissions() for permissions in permissions_classes]
-
-    def create(self, request, *args, **kwargs):
-        data = request.data.copy()
-        data["owner"] = request.user_data.uuid
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
