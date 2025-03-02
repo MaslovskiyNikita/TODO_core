@@ -1,8 +1,8 @@
 import os
 
 import jwt
+from auth.data_classes.user import UserData
 from core.settings import ALGORITMS, SECRET_KEY
-from data_classes.user import UserData
 from django.http import JsonResponse
 from dotenv import load_dotenv
 from rest_framework.authentication import get_authorization_header

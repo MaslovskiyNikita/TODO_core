@@ -1,3 +1,4 @@
+from auth.choices import permission_pool
 from rest_framework.permissions import BasePermission
 
 permissions_on_action = {

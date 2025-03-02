@@ -1,7 +1,7 @@
-from api.v1.filters import TaskFilter
+from api.v1.filters.filters import TaskFilter
 from api.v1.tasks.serializers.task import TaskSerializer
-from choices.permission_pool import PermissionPool
-from choices.roles import Role
+from auth.choices.permission_pool import PermissionPool
+from auth.choices.roles import Role
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets

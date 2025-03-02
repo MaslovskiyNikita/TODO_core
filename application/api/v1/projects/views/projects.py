@@ -1,6 +1,6 @@
 from api.v1.projects.serializers.project_serializer import ProjectSerializer
-from choices.permission_pool import PermissionPool
-from choices.roles import Role
+from auth.choices.permission_pool import PermissionPool
+from auth.choices.roles import Role
 from django.db.models import Q
 from projects.models import Project, ProjectMember
 from rest_framework import status, viewsets

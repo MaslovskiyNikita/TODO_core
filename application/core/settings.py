@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
     "core",
+    "api.v1",
+    "api",
     "projects",
     "tasks",
 ]
@@ -60,7 +62,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "jwt_middleware.JWTAuthenticationMiddleware",
+    "auth.middleware.jwt_middleware.JWTAuthenticationMiddleware",
 ]
 
 REST_FRAMEWORK = {
