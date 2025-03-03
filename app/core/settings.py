@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import os
-from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -26,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = "django-insecure-f^49&ouw)z-5g_hziv1bwb=p$%%fr3u4@h46*6(9t8%vh=bez!"
+SECRET_KEY = "django-insecure-f^49&ouw)z-5g_hziv1bwb=p$%%fr3u4@h46*6(9t8%vh=bez!"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -40,19 +39,14 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
-    "django.contrib.sites",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "django_filters",
     "core",
-    "api.v1",
-    "api",
     "projects",
     "tasks",
 ]
-
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -62,15 +56,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "auth.middleware.jwt_middleware.JWTAuthenticationMiddleware",
 ]
-
-REST_FRAMEWORK = {
-    "DEFAULT_permissions_CLASSES": ("api.projects.permissions.IsUserAdminOrOwner",),
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 10,
-}
-
 
 ROOT_URLCONF = "core.urls"
 
@@ -91,9 +77,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "core.wsgi.application"
-
-SECRET_KEY = os.getenv("SECRET_KEY", "Nikita")
-ALGORITMS = os.getenv("ALGORITMS", "HS256")
 
 
 # Database
