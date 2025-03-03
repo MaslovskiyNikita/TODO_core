@@ -1,5 +1,5 @@
 from api.v1.filters.filters import TaskFilter
-from api.v1.projects import permissions
+from api.v1.permissions import permissions
 from api.v1.tasks.serializers.task import TaskSerializer
 from auth.choices.permission_pool import PermissionPool
 from auth.choices.roles import Role
@@ -35,13 +35,9 @@ class TaskViews(viewsets.ModelViewSet):
             )
 
     def get_permissions(self):
-        current_action = self.action
-        if current_action in ["update", "partial_update", "destroy"]:
-            permissions_classes = self.permission_class_by_action.get(current_action)
-        else:
-            permissions_classes = []
+        permissions_classes = self.permission_class_by_action.get(self.action, [])
 
-        return [permissions() for permissions in permissions_classes]
+        return [permission() for permission in permissions_classes]
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
