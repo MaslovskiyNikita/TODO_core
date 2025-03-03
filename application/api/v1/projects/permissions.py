@@ -1,10 +1,11 @@
+from auth.choices.permission_pool import PermissionPool
 from rest_framework.permissions import BasePermission
 
 permissions_on_action = {
-    "create": ["project_create", "task_create"],
-    "read": ["project_read", "task_read"],
-    "update": ["project_update", "task_update"],
-    "destroy": ["project_delete", "task_delete"],
+    "create": PermissionPool.PROJECT_CREATE.value,
+    "read": PermissionPool.PROJECT_READ.value,
+    "update": PermissionPool.PROJECT_UPDATE.value,
+    "destroy": PermissionPool.PROJECT_DESTROY.value,
 }
 
 

@@ -1,12 +1,15 @@
 from enum import Enum
 
-from api.v1.projects import permissions
-from rest_framework.permissions import IsAuthenticated
-
 
 class PermissionPool(Enum):
-    CREATE = [IsAuthenticated]
-    READ = [permissions.IsUserAdminOrOwner]
-    UPDATE = [IsAuthenticated | permissions.IsUserCanUpdate]
-    PARTIAL_UPDATE = [IsAuthenticated | permissions.IsUserCanUpdate]
-    DESTROY = [permissions.IsUserCanDelete | permissions.IsUserAdminOrOwner]
+    TASK_CREATE = "task_create"
+    TASK_READ = "task_read"
+    TASK_UPDATE = "task_update"
+    TASK_PARTIAL_UPDATE = "task_partial_update"
+    TASK_DESTROY = "task_destroy"
+
+    PROJECT_CREATE = "project_create"
+    PROJECT_READ = "project_read"
+    PROJECT_UPDATE = "project_update"
+    PROJECT_PARTIAL_UPDATE = "project_partial_update"
+    PROJECT_DESTROY = "project_destroy"

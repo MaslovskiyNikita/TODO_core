@@ -1,10 +1,12 @@
 from api.v1.filters.filters import TaskFilter
+from api.v1.projects import permissions
 from api.v1.tasks.serializers.task import TaskSerializer
 from auth.choices.permission_pool import PermissionPool
 from auth.choices.roles import Role
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from tasks.models.task_model import Task
 
@@ -18,9 +20,9 @@ class TaskViews(viewsets.ModelViewSet):
     ordering = ["created_at"]
 
     permission_class_by_action = {
-        "update": PermissionPool.UPDATE.value,
-        "partial_update": PermissionPool.PARTIAL_UPDATE.value,
-        "destroy": PermissionPool.DESTROY.value,
+        "update": [IsAuthenticated],
+        "partial_update": [IsAuthenticated | permissions.IsUserCanUpdate],
+        "destroy": [permissions.IsUserCanDelete | permissions.IsUserAdminOrOwner],
     }
 
     def get_queryset(self):

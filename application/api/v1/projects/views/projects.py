@@ -1,19 +1,22 @@
+from api.v1.projects import permissions
 from api.v1.projects.serializers.project_serializer import ProjectSerializer
 from auth.choices.permission_pool import PermissionPool
 from auth.choices.roles import Role
 from django.db.models import Q
 from projects.models import Project, ProjectMember
 from rest_framework import status, viewsets
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.filter(is_archived=False)
     serializer_class = ProjectSerializer
+
     permission_class_by_action = {
-        "update": PermissionPool.UPDATE.value,
-        "partial_update": PermissionPool.PARTIAL_UPDATE.value,
-        "destroy": PermissionPool.DESTROY.value,
+        "update": [IsAuthenticated],
+        "partial_update": [IsAuthenticated | permissions.IsUserCanUpdate],
+        "destroy": [permissions.IsUserCanDelete | permissions.IsUserAdminOrOwner],
     }
 
     def get_queryset(self):
