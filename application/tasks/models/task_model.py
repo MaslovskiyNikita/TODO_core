@@ -14,6 +14,7 @@ class Task(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="tasks")
     assigned_to = models.UUIDField()
+    is_archived = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
