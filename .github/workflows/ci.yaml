@@ -35,6 +35,12 @@ jobs:
             curl -sSL https://install.python-poetry.org | python3 -
   
       
+      - name: Create .env file      
+        run: |
+            echo "${{ secrets.env }}" >> .env
+      
+      
+
 
       - name: Docker up
         run: |
