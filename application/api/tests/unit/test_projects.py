@@ -2,8 +2,6 @@ import pytest
 from conftest import client, project
 from projects.models import Project
 
-BASE_URL = "http://localhost:8000"
-
 
 @pytest.mark.django_db
 def test_get_projects(project: Project, client):
