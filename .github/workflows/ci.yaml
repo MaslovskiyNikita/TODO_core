@@ -38,12 +38,12 @@ jobs:
       - name: Install dependencies
   
         run: |
-            poetry install --no-root
+          poetry install --no-root
   
   
-            - name: Set DJANGO_SETTINGS_MODULE
+          - name: Set DJANGO_SETTINGS_MODULE
 
-            run: echo "DJANGO_SETTINGS_MODULE=core.settings" >> $GITHUB_ENV
+           run: echo "DJANGO_SETTINGS_MODULE=core.settings" >> $GITHUB_ENV
     
     
       - name: Set PYTHONPATH    
@@ -53,12 +53,12 @@ jobs:
       - name: Run tests with pytest
     
         run: |
-            poetry run pytest --cov=application
+          poetry run pytest --cov=application
   
   
       - name: Run tests with pytest
   
         run: |
   
-            poetry run pytest --cov=application
+          poetry run pytest --cov=application
 
