@@ -1,0 +1,18 @@
+import factory
+from factory import Faker
+
+from application.projects.factories.project import ProjectFactory
+from application.tasks.models import Task
+
+
+class TaskFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Task
+
+    id = Faker("uuid4")
+    title = Faker("sentence", nb_words=5)
+    description = Faker("sentence")
+    status = Faker("word")
+    due_date = Faker("date_time")
+    project = factory.SubFactory(ProjectFactory)
+    assigned_to = Faker("uuid4")

@@ -47,8 +47,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
     "core",
-    "api.v1",
-    "api",
     "projects",
     "tasks",
 ]
@@ -66,7 +64,7 @@ MIDDLEWARE = [
 ]
 
 REST_FRAMEWORK = {
-    "DEFAULT_permissions_CLASSES": ("api.projects.permissions.IsUserAdminOrOwner",),
+    # "DEFAULT_permissions_CLASSES": ("api.projects.permissions.IsUserAdminOrOwner",),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
 }

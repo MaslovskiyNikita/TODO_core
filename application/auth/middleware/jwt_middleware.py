@@ -21,7 +21,6 @@ class JWTAuthenticationMiddleware:
             token = auth_header.split(" ")[1]
             try:
                 decoded_token = jwt.decode(token, SECRET_KEY, ALGORITMS)
-
                 request.user_data = UserData(
                     name=decoded_token.get("name", "user"),
                     uuid=decoded_token.get("uuid", None),

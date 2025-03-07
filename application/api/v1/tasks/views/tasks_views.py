@@ -20,7 +20,7 @@ class TaskViews(viewsets.ModelViewSet):
     ordering = ["created_at"]
 
     permission_class_by_action = {
-        "update": [IsAuthenticated],
+        "update": [permissions.IsUserCanUpdate | permissions.IsUserCanUpdate],
         "partial_update": [IsAuthenticated | permissions.IsUserCanUpdate],
         "destroy": [permissions.IsUserCanDelete | permissions.IsUserAdminOrOwner],
     }

@@ -22,4 +22,7 @@ class ProjectMember(models.Model):
         Project, on_delete=models.CASCADE, related_name="members"
     )
     user = models.UUIDField()
-    role = models.CharField(max_length=50)  # переделать под choice field
+    role = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.user} - {self.project.name}"

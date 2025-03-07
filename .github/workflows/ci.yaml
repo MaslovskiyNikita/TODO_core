@@ -30,3 +30,8 @@ jobs:
         with:
           checkName: 'mypy'
 
+      - name: Run tests with pytest
+        run: |
+          pip install pytest-cov
+          pytest application/ --cov=./ --cov-report=xml    
+

@@ -14,8 +14,10 @@ class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
 
     permission_class_by_action = {
-        "update": [permissions.IsUserAdminOrOwner, IsAuthenticated],
-        "partial_update": [IsAuthenticated | permissions.IsUserCanUpdate],
+        "update": [permissions.IsUserAdminOrOwner | permissions.IsUserCanUpdate],
+        "partial_update": [
+            permissions.IsUserCanUpdate | permissions.IsUserAdminOrOwner
+        ],
         "destroy": [permissions.IsUserCanDelete | permissions.IsUserAdminOrOwner],
     }
 

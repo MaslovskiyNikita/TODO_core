@@ -16,10 +16,10 @@ class IsUserAdmin(BasePermission):
 
 class IsUserAdminOrOwner(BasePermission):
     def has_permission(self, request, view):
-        if hasattr(view, "action"):
+        if hasattr(view, "action") and request.user_data.role != "admin":
             return any(
                 perm in request.user_data.permissions
-                for perm in permissions_on_action.get(view.action, [])
+                for perm in permissions_on_action.get(view.action)
             )
         return True
 
