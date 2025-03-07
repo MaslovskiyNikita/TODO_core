@@ -33,5 +33,5 @@ jobs:
       - name: Run tests with pytest
         run: |
           pip install pytest-cov
-          pytest application/ --cov=./ --cov-report=xml    
+          pytest application/ --cov=./
 
