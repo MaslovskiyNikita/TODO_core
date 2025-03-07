@@ -29,18 +29,14 @@ jobs:
         uses: sasanquaneuf/mypy-github-action@releases/v1
         with:
           checkName: 'mypy'
-
-      - name: Install Poetry
-        run: |
-            curl -sSL https://install.python-poetry.org | python3 -
   
-      
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+
       - name: Create .env file      
         run: |
             echo "${{ secrets.env }}" >> .env
-      
-      
-
 
       - name: Docker up
         run: |
@@ -49,7 +45,7 @@ jobs:
     
       - name: Run tests with pytest
         run: |
-          docker compose exec web poetry run pytest application/
+          docker compose exec web poetry run pytest application/ --cov
   
   
 
