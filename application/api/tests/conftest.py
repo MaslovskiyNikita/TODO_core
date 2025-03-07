@@ -1,8 +1,7 @@
 import pytest
+from projects.factories.project import ProjectFactory
 from rest_framework.test import APIClient
-
-from application.projects.factories.project import ProjectFactory
-from application.tasks.factories.task import TaskFactory
+from tasks.factories.task import TaskFactory
 
 
 @pytest.fixture
