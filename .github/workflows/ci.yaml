@@ -34,27 +34,20 @@ jobs:
         run: |
             curl -sSL https://install.python-poetry.org | python3 -
   
-  
-      - name: Install dependencies
-  
-        run: |
-          poetry install --no-root
-  
-  
-      - name: Set DJANGO_SETTINGS_MODULE
+      
 
+      - name: Docker up
         run: |
-          echo "DJANGO_SETTINGS_MODULE=core.settings" >> $GITHUB_ENV
-    
-    
-      - name: Set PYTHONPATH    
-        run: echo "PYTHONPATH=$(pwd)/application" >> $GITHUB_ENV
-    
+          docker compose up
+
+      - name: Migrations
+        run: |
+          docker compose exec python application/manage.py migrate
+          
     
       - name: Run tests with pytest
-    
         run: |
-          poetry run pytest
+          docker compose exec poetry run pytest 
   
   
 
