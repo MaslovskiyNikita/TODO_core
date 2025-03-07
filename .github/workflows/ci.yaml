@@ -44,16 +44,12 @@ jobs:
 
       - name: Docker up
         run: |
-          docker compose up
-
-      - name: Migrations
-        run: |
-          docker compose exec python application/manage.py migrate
+          docker compose up -d
           
     
       - name: Run tests with pytest
         run: |
-          docker compose exec poetry run pytest 
+          docker compose exec poetry run pytest application/
   
   
 
