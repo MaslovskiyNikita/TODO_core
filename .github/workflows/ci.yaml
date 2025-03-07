@@ -30,8 +30,19 @@ jobs:
         with:
           checkName: 'mypy'
 
+      - name: Install Poetry
+
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+  
+  
+      - name: Install dependencies
+  
+        run: |
+            poetry install
+  
+  
       - name: Run tests with pytest
         run: |
-          pip install pytest-cov
-          pytest application/ --cov=./
+            poetry run pytest --cov=./
 
