@@ -1,7 +1,6 @@
 import factory
 from factory import Faker
-
-from application.projects.models import Project
+from projects.models import Project
 
 
 class ProjectFactory(factory.django.DjangoModelFactory):
