@@ -1,7 +1,6 @@
 import pytest
 from conftest import client, project
-
-from application.projects.models import Project
+from projects.models import Project
 
 BASE_URL = "http://localhost:8000"
 

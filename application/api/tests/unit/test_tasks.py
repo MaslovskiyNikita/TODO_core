@@ -3,9 +3,8 @@ import uuid
 
 import pytest
 from conftest import client, task
-
-from application.projects.models import Project
-from application.tasks.models import Task
+from projects.models import Project
+from tasks.models import Task
 
 
 @pytest.mark.django_db
