@@ -31,21 +31,27 @@ jobs:
           checkName: 'mypy'
 
       - name: Install Poetry
-
         run: |
-          curl -sSL https://install.python-poetry.org | python3 -
+            curl -sSL https://install.python-poetry.org | python3 -
   
   
       - name: Install dependencies
   
         run: |
-            poetry install --no-root
-            
+            poetry install
+  
+  
       - name: Set DJANGO_SETTINGS_MODULE
-        run: echo "DJANGO_SETTINGS_MODULE=application.core.settings" >> $GITHUB_ENV      
+        run: echo "DJANGO_SETTINGS_MODULE=core.settings" >> $GITHUB_ENV
+  
+  
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$(pwd)/application" >> $GITHUB_ENV
+  
   
       - name: Run tests with pytest
+  
         run: |
-
-          poetry run pytest --cov=application
+  
+            poetry run pytest --cov=application
 
