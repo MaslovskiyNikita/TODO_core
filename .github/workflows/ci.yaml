@@ -40,7 +40,9 @@ jobs:
   
         run: |
             poetry install --no-root
-  
+            
+      - name: Set DJANGO_SETTINGS_MODULE
+        run: echo "DJANGO_SETTINGS_MODULE=application.core.settings" >> $GITHUB_ENV      
   
       - name: Run tests with pytest
         run: |
