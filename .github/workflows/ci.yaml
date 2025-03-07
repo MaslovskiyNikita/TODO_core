@@ -54,7 +54,7 @@ jobs:
       - name: Run tests with pytest
     
         run: |
-          poetry run pytest --cov
+          poetry run pytest application/ --cov
   
   
 
