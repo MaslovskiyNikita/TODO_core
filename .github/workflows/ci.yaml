@@ -46,6 +46,6 @@ jobs:
   
       - name: Run tests with pytest
         run: |
-            export PYTHONPATH=$(pwd)/application
-            poetry run pytest --cov=./
+
+          poetry run pytest --cov=application
 
