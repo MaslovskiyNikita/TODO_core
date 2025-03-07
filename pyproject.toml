@@ -17,6 +17,7 @@ requests = "^2.32.3"
 factory-boy = "^3.3.3"
 pytest-django = "^4.10.0"
 pytest-factoryboy = "^2.7.0"
+pytest-cov = "^6.0.0"
 
 
 [tool.poetry.group.dev.dependencies]
