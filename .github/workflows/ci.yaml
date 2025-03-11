@@ -59,7 +59,7 @@ jobs:
   
       - name: Run diff-cover
         run: |
-          diff-cover coverage.xml --compare-branch=main/${{ github.base_ref }}   
+          diff-cover coverage.xml --compare-branch=${{ github.base_ref }}   
 
           
   
