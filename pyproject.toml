@@ -18,6 +18,7 @@ factory-boy = "^3.3.3"
 pytest-django = "^4.10.0"
 pytest-factoryboy = "^2.7.0"
 pytest-cov = "^6.0.0"
+diff-cover = "^9.2.4"
 
 
 [tool.poetry.group.dev.dependencies]

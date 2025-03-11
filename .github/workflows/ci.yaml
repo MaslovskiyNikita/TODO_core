@@ -49,5 +49,12 @@ jobs:
         run: |
           docker compose exec web poetry run pytest application/ --cov
   
+          
+      - name: Run diff-cover
+        run: |
+          poetry run diff-cover coverage.xml --compare-branch=origin/${{ github.base_ref }}     
+
+          
+  
   
 
