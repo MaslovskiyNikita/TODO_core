@@ -47,19 +47,15 @@ jobs:
     
       - name: Run tests with pytest
         run: |
-          docker compose exec web poetry run pytest application/ --cov
+          docker compose exec web poetry run pytest application/ --cov --cov-report=xml
   
       - name: Install diff-cover
         run: |
           pip install diff-cover    
-
-      - name: Generate coverage report
-        run: |
-          docker compose exec web poetry run coverage xml
   
       - name: Run diff-cover
         run: |
-          diff-cover coverage.xml --compare-branch=${{ github.base_ref }}   
+          diff-cover coverage.xml --compare-branch=origin/${{ github.base_ref }}   
 
           
   
