@@ -55,11 +55,11 @@ jobs:
 
       - name: Generate coverage report
         run: |
-          docker compose exec web poetry run coverage report --show-missing > coverage.txt
+          docker compose exec web poetry run coverage xml
   
       - name: Run diff-cover
         run: |
-          diff-cover coverage.txt --compare-branch=origin/${{ github.base_ref }}     
+          diff-cover coverage.xml --compare-branch=origin/${{ github.base_ref }}   
 
           
   
