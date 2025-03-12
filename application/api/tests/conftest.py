@@ -1,7 +1,13 @@
 import pytest
+from api.tests.e2e.payload_for_tests import payload_admin, payload_owner, payload_user
+from auth.jwt_service.jwt_code import JWTGenerator
+from core.settings import ALGORITMS, SECRET_KEY
+from dotenv import load_dotenv
 from projects.factories.project import ProjectFactory
 from rest_framework.test import APIClient
 from tasks.factories.task import TaskFactory
+
+load_dotenv()
 
 
 @pytest.fixture
@@ -14,13 +20,25 @@ def task():
     return TaskFactory.create()
 
 
-@pytest.fixture(scope="session")
-def headers():
-    return "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwidXVpZCI6IjNmNDdmNzg2LTgyNDAtNDZhYi1hZGNmLWVlMmY1NGQwNThkNyIsInJvbGUiOiJhZG1pbiIsInBlcm1pc3Npb25zIjpbInByb2plY3RfY3JlYXRlIiwidGFza19jcmVhdGUiLCJwcm9qZWN0X3JlYWQiLCJ0YXNrX3JlYWQiLCJwcm9qZWN0X3VwZGF0ZSIsInRhc2tfdXBkYXRlIiwicHJvamVjdF9kZXN0cm95IiwidGFza19kZXN0cm95Il19.cc-he7ggEVkEzUevx6zWgDLVHD92i5LEDbBrOULT8Sc"
+@pytest.fixture()
+def client_admin():
+    token_admin = JWTGenerator(SECRET_KEY, ALGORITMS).jwt_code(payload_admin)
+    client_admin = APIClient()
+    client_admin.credentials(HTTP_AUTHORIZATION=("Bearer " + token_admin))
+    return client_admin
 
 
-@pytest.fixture(scope="session")
-def client(headers):
-    client = APIClient()
-    client.credentials(HTTP_AUTHORIZATION=headers)
-    return client
+@pytest.fixture()
+def client_user():
+    token_user = JWTGenerator(SECRET_KEY, ALGORITMS).jwt_code(payload_user)
+    client_user = APIClient()
+    client_user.credentials(HTTP_AUTHORIZATION=f"Bearer {token_user}")
+    return client_user
+
+
+@pytest.fixture()
+def client_owner():
+    token_owner = JWTGenerator(SECRET_KEY, ALGORITMS).jwt_code(payload_owner)
+    client_owner = APIClient()
+    client_owner.credentials(HTTP_AUTHORIZATION=f"Bearer {token_owner}")
+    return client_owner

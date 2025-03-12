@@ -1,0 +1,72 @@
+import datetime
+import uuid
+
+import pytest
+from projects.models import Project
+from rest_framework import status
+from tasks.models import Task
+
+from ...conftest import client_admin, client_owner, client_user
+
+
+@pytest.mark.django_db
+def test_create_task_admin(task: Task, project: Project, client_admin):
+    data = {
+        "title": "Task test",
+        "description": "Task description",
+        "status": "asdasd",
+        "due_date": datetime.datetime.now().isoformat(),
+        "project": project.id,
+        "assigned_to": str(uuid.uuid4()),
+    }
+    response = client_admin.post("/api/v1/tasks/", data=data)
+    assert response.status_code == status.HTTP_201_CREATED
+
+
+@pytest.mark.django_db
+def test_create_task_user(task: Task, project: Project, client_user):
+    data = {
+        "title": "Task test",
+        "description": "Task description",
+        "status": "asdasd",
+        "due_date": datetime.datetime.now().isoformat(),
+        "project": project.id,
+        "assigned_to": str(uuid.uuid4()),
+    }
+    response = client_user.post("/api/v1/tasks/", data=data)
+    assert response.status_code == status.HTTP_201_CREATED
+
+
+@pytest.mark.django_db
+def test_create_task_owner(task: Task, project: Project, client_owner):
+    data = {
+        "title": "Task test",
+        "description": "Task description",
+        "status": "asdasd",
+        "due_date": datetime.datetime.now().isoformat(),
+        "project": project.id,
+        "assigned_to": str(uuid.uuid4()),
+    }
+    response = client_owner.post("/api/v1/tasks/", data=data)
+    assert response.status_code == status.HTTP_201_CREATED
+
+
+@pytest.mark.django_db
+def test_failed_create_task_admin(task: Task, project: Project, client_admin):
+    data: dict = {}
+    response = client_admin.post("/api/v1/tasks/", data=data)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+def test_failed_create_task_user(task: Task, project: Project, client_user):
+    data: dict = {}
+    response = client_user.post("/api/v1/tasks/", data=data)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+def test_failed_create_task_owner(task: Task, project: Project, client_owner):
+    data: dict = {}
+    response = client_owner.post("/api/v1/tasks/", data=data)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
