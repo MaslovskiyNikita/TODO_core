@@ -1,11 +1,16 @@
-from api.v1.permissions import permissions
+from api.v1.projects.permissions import (
+    IsAuthenticated,
+    IsUserAdmin,
+    IsUserAdminOrOwner,
+    IsUserCanDelete,
+    IsUserCanUpdate,
+    IsUserOwner,
+)
 from api.v1.projects.serializers.project_serializer import ProjectSerializer
-from auth.choices.permission_pool import PermissionPool
 from auth.choices.roles import Role
 from django.db.models import Q
 from projects.models import Project, ProjectMember
 from rest_framework import status, viewsets
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 
@@ -14,11 +19,9 @@ class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
 
     permission_class_by_action = {
-        "update": [permissions.IsUserAdminOrOwner | permissions.IsUserCanUpdate],
-        "partial_update": [
-            permissions.IsUserCanUpdate | permissions.IsUserAdminOrOwner
-        ],
-        "destroy": [permissions.IsUserCanDelete | permissions.IsUserAdminOrOwner],
+        "update": [IsUserOwner | IsUserCanUpdate | IsUserAdmin],
+        "partial_update": [IsUserCanUpdate | IsUserAdminOrOwner],
+        "destroy": [IsUserCanDelete | IsUserAdminOrOwner],
     }
 
     def get_queryset(self):
@@ -53,8 +56,6 @@ class ProjectViewSet(viewsets.ModelViewSet):
         self.perform_update(serializer)
 
         if getattr(instance, "_prefetched_objects_cache", None):
-            # If 'prefetch_related' has been applied to a queryset, we need to
-            # forcibly invalidate the prefetch cache on the instance.
             instance._prefetched_objects_cache = {}
 
-        return Response(serializer.data)
+        return Response(serializer.data, status=204)

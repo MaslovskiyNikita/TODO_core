@@ -9,20 +9,27 @@ permissions_on_action = {
 }
 
 
+class IsAuthenticated(BasePermission):
+    def has_permission(self, request, view):
+        return hasattr(request, "user_data")
+
+
 class IsUserAdmin(BasePermission):
     def has_permission(self, request, view):
-        return hasattr(request, "user_data") and request.user_data.role == "admin"
+        return request.user_data.role == "admin"  # проверить
 
 
-class IsUserAdminOrOwner(BasePermission):
+class HasTaskPermissions(BasePermission):
     def has_permission(self, request, view):
-        if hasattr(view, "action") and request.user_data.role != "admin":
+        if hasattr(view, "action"):
             return any(
                 perm in request.user_data.permissions
                 for perm in permissions_on_action.get(view.action)
             )
         return True
 
+
+class IsUserAdminOrOwner(BasePermission):
     def has_object_permission(self, request, view, obj):
         return request.user_data.role == "admin" or obj.owner == request.user_data.uuid
 

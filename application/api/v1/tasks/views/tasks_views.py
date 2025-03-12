@@ -1,5 +1,12 @@
 from api.v1.filters.filters import TaskFilter
-from api.v1.permissions import permissions
+from api.v1.tasks.permissions import (
+    IsAuthenticated,
+    IsUserAdmin,
+    IsUserAdminOrOwner,
+    IsUserCanDelete,
+    IsUserCanUpdate,
+    IsUserOwner,
+)
 from api.v1.tasks.serializers.task import TaskSerializer
 from auth.choices.permission_pool import PermissionPool
 from auth.choices.roles import Role
@@ -20,9 +27,9 @@ class TaskViews(viewsets.ModelViewSet):
     ordering = ["created_at"]
 
     permission_class_by_action = {
-        "update": [permissions.IsUserCanUpdate | permissions.IsUserCanUpdate],
-        "partial_update": [IsAuthenticated | permissions.IsUserCanUpdate],
-        "destroy": [permissions.IsUserCanDelete | permissions.IsUserAdminOrOwner],
+        "update": [IsUserCanUpdate | IsUserAdminOrOwner],
+        "partial_update": [IsAuthenticated | IsUserCanUpdate],
+        "destroy": [IsUserCanDelete | IsUserAdminOrOwner],
     }
 
     def get_queryset(self):

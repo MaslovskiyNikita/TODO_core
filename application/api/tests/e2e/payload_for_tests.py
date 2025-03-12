@@ -5,16 +5,7 @@ payload_admin = {
     "name": "John Doe",
     "uuid": "3f47f786-8240-46ab-adcf-ee2f54d058d7",
     "role": "admin",
-    "permissions": [
-        "project_create",
-        "task_create",
-        "project_read",
-        "task_read",
-        "project_update",
-        "task_update",
-        "project_delete",
-        "task_delete",
-    ],
+    "permissions": [],
 }
 
 payload_user = {
