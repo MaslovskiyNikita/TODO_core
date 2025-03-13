@@ -5,36 +5,31 @@ from rest_framework import status
 
 
 @pytest.mark.django_db
-def test_delete_project_admin(project, client_admin):
-    response = client_admin.delete(f"/api/v1/projects/{project.id}/")
-    assert response.status_code == status.HTTP_204_NO_CONTENT
+class TestDeleteProjectAPI:
+    @pytest.mark.parametrize(
+        "client_fixture, expected_status",
+        [
+            (client_admin, status.HTTP_204_NO_CONTENT),
+            (client_user, status.HTTP_404_NOT_FOUND),
+            (client_owner, status.HTTP_404_NOT_FOUND),
+        ],
+    )
+    def test_delete_project(
+        self, project: Project, client_fixture, expected_status, request
+    ):
+        client = request.getfixturevalue(client_fixture.__name__)
+        response = client.delete(f"/api/v1/projects/{project.id}/")
+        assert response.status_code == expected_status
 
-
-@pytest.mark.django_db
-def test_delete_project_user(project, client_user):
-    response = client_user.delete(f"/api/v1/projects/{project.id}/")
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-
-
-@pytest.mark.django_db
-def test_delete_project_owner(project, client_owner):
-    response = client_owner.delete(f"/api/v1/projects/{project.id}/")
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-
-
-@pytest.mark.django_db
-def test_failed_delete_project_admin(project, client_admin):
-    response = client_admin.delete(f"/api/v1/projects/aaa/")
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-
-
-@pytest.mark.django_db
-def test_failed_delete_project_user(project, client_user):
-    response = client_user.delete(f"/api/v1/projects/aaa/")
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-
-
-@pytest.mark.django_db
-def test_failed_delete_project_owner(project, client_owner):
-    response = client_owner.delete(f"/api/v1/projects/aaa/")
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    @pytest.mark.parametrize(
+        "client_fixture, expected_status",
+        [
+            (client_admin, status.HTTP_404_NOT_FOUND),
+            (client_user, status.HTTP_404_NOT_FOUND),
+            (client_owner, status.HTTP_404_NOT_FOUND),
+        ],
+    )
+    def test_failed_delete_project(self, client_fixture, expected_status, request):
+        client = request.getfixturevalue(client_fixture.__name__)
+        response = client.delete("/api/v1/projects/aaa/")
+        assert response.status_code == expected_status

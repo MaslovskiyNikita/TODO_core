@@ -5,36 +5,29 @@ from tasks.models import Task
 
 
 @pytest.mark.django_db
-def test_delete_task_admin(task, client_admin):
-    response = client_admin.delete(f"/api/v1/tasks/{task.id}/")
-    assert response.status_code == status.HTTP_204_NO_CONTENT
+class TestDeleteTaskAPI:
+    @pytest.mark.parametrize(
+        "client_fixture, expected_status",
+        [
+            (client_admin, status.HTTP_204_NO_CONTENT),
+            (client_user, status.HTTP_404_NOT_FOUND),
+            (client_owner, status.HTTP_204_NO_CONTENT),
+        ],
+    )
+    def test_delete_task(self, task: Task, client_fixture, expected_status, request):
+        client = request.getfixturevalue(client_fixture.__name__)
+        response = client.delete(f"/api/v1/tasks/{task.id}/")
+        assert response.status_code == expected_status
 
-
-@pytest.mark.django_db
-def test_delete_task_user(task, client_user):
-    response = client_user.delete(f"/api/v1/tasks/{task.id}/")
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-
-
-@pytest.mark.django_db
-def test_delete_task_owner(task, client_owner):
-    response = client_owner.delete(f"/api/v1/tasks/{task.id}/")
-    assert response.status_code == status.HTTP_204_NO_CONTENT
-
-
-@pytest.mark.django_db
-def test_failed_delete_task_admin(task, client_admin):
-    response = client_admin.delete(f"/api/v1/tasks/aaa/")
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-
-
-@pytest.mark.django_db
-def test_failed_delete_task_user(task, client_user):
-    response = client_user.delete(f"/api/v1/tasks/aaa/")
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-
-
-@pytest.mark.django_db
-def test_failed_delete_task_owner(task, client_owner):
-    response = client_owner.delete(f"/api/v1/tasks/aaa/")
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    @pytest.mark.parametrize(
+        "client_fixture, expected_status",
+        [
+            (client_admin, status.HTTP_404_NOT_FOUND),
+            (client_user, status.HTTP_404_NOT_FOUND),
+            (client_owner, status.HTTP_404_NOT_FOUND),
+        ],
+    )
+    def test_failed_delete_task(self, client_fixture, expected_status, request):
+        client = request.getfixturevalue(client_fixture.__name__)
+        response = client.delete("/api/v1/tasks/aaa/")
+        assert response.status_code == expected_status

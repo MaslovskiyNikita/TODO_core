@@ -5,42 +5,35 @@ from rest_framework import status
 
 
 @pytest.mark.django_db
-def test_create_project_admin(project: Project, client_admin):
-    data = {"name": "Test", "description": "This is for tests"}
-    response = client_admin.post("/api/v1/projects/", data=data)
-    assert response.status_code == status.HTTP_201_CREATED
+class TestCreateProjectAPI:
+    @pytest.mark.parametrize(
+        "client_fixture, expected_status",
+        [
+            (client_admin, status.HTTP_201_CREATED),
+            (client_user, status.HTTP_201_CREATED),
+            (client_owner, status.HTTP_201_CREATED),
+        ],
+    )
+    def test_create_project(self, client_fixture, expected_status, request):
+        client = request.getfixturevalue(client_fixture.__name__)
+        data = {"name": "Test", "description": "This is for tests"}
+        response = client.post("/api/v1/projects/", data=data)
+        assert response.status_code == expected_status
 
+        if expected_status == status.HTTP_201_CREATED:
+            project_id = response.json().get("id")
+            assert Project.objects.filter(id=project_id).exists()
 
-@pytest.mark.django_db
-def test_create_project_user(project: Project, client_user):
-    data = {"name": "Test", "description": "This is for tests"}
-    response = client_user.post("/api/v1/projects/", data=data)
-    assert response.status_code == status.HTTP_201_CREATED
-
-
-@pytest.mark.django_db
-def test_create_project_owner(project: Project, client_owner):
-    data = {"name": "Test", "description": "This is for tests"}
-    response = client_owner.post("/api/v1/projects/", data=data)
-    assert response.status_code == status.HTTP_201_CREATED
-
-
-@pytest.mark.django_db
-def test_failed_create_project_admin(project: Project, client_admin):
-    data: dict = {}
-    response = client_admin.post("/api/v1/projects/", data=data)
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-
-@pytest.mark.django_db
-def test_failed_create_project_user(project: Project, client_user):
-    data: dict = {}
-    response = client_user.post("/api/v1/projects/", data=data)
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-
-@pytest.mark.django_db
-def test_failed_create_project_owner(project: Project, client_owner):
-    data: dict = {}
-    response = client_owner.post("/api/v1/projects/", data=data)
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    @pytest.mark.parametrize(
+        "client_fixture, expected_status",
+        [
+            (client_admin, status.HTTP_400_BAD_REQUEST),
+            (client_user, status.HTTP_400_BAD_REQUEST),
+            (client_owner, status.HTTP_400_BAD_REQUEST),
+        ],
+    )
+    def test_failed_create_project(self, client_fixture, expected_status, request):
+        client = request.getfixturevalue(client_fixture.__name__)
+        data: dict = {}
+        response = client.post("/api/v1/projects/", data=data)
+        assert response.status_code == expected_status

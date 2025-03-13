@@ -5,57 +5,43 @@ from tasks.models import Task
 
 
 @pytest.mark.django_db
-def test_get_tasks_admin(task: Task, client_admin):
-    response = client_admin.get("/api/v1/tasks/")
-    assert response.status_code == status.HTTP_200_OK
-    assert isinstance(response.json().get("results"), list)
+class TestTaskAPI:
+    @pytest.mark.parametrize(
+        "client_fixture, expected_status",
+        [
+            (client_admin, status.HTTP_200_OK),
+            (client_user, status.HTTP_200_OK),
+            (client_owner, status.HTTP_200_OK),
+        ],
+    )
+    def test_get_tasks(self, task: Task, client_fixture, expected_status, request):
+        client = request.getfixturevalue(client_fixture.__name__)
+        response = client.get("/api/v1/tasks/")
+        assert response.status_code == expected_status
+        assert isinstance(response.json().get("results"), list)
 
+    @pytest.mark.parametrize(
+        "client_fixture, expected_status",
+        [
+            (client_admin, status.HTTP_200_OK),
+            (client_user, status.HTTP_404_NOT_FOUND),
+            (client_owner, status.HTTP_200_OK),
+        ],
+    )
+    def test_get_task_by_id(self, task: Task, client_fixture, expected_status, request):
+        client = request.getfixturevalue(client_fixture.__name__)
+        response = client.get(f"/api/v1/tasks/{task.id}/")
+        assert response.status_code == expected_status
 
-@pytest.mark.django_db
-def test_get_tasks_user(task: Task, client_user):
-    response = client_user.get("/api/v1/tasks/")
-    assert response.status_code == status.HTTP_200_OK
-    assert isinstance(response.json().get("results"), list)
-
-
-@pytest.mark.django_db
-def test_get_tasks_owner(task: Task, client_owner):
-    response = client_owner.get("/api/v1/tasks/")
-    assert response.status_code == status.HTTP_200_OK
-    assert isinstance(response.json().get("results"), list)
-
-
-@pytest.mark.django_db
-def test_get_task_by_id_admin(task: Task, client_admin):
-    response = client_admin.get(f"/api/v1/tasks/{task.id}/")
-    assert response.status_code == status.HTTP_200_OK
-
-
-@pytest.mark.django_db
-def test_get_task_by_id_user(task: Task, client_user):
-    response = client_user.get(f"/api/v1/tasks/{task.id}/")
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-
-
-@pytest.mark.django_db
-def test_get_task_by_id_owner(task: Task, client_owner):
-    response = client_owner.get(f"/api/v1/tasks/{task.id}/")
-    assert response.status_code == status.HTTP_200_OK
-
-
-@pytest.mark.django_db
-def test_failed_get_task_by_id_admin(task: Task, client_admin):
-    response = client_admin.get(f"/api/v1/tasks/aaa/")
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-
-
-@pytest.mark.django_db
-def test_failed_get_task_by_id_user(task: Task, client_user):
-    response = client_user.get(f"/api/v1/tasks/aaa/")
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-
-
-@pytest.mark.django_db
-def test_failed_get_task_by_id_owner(task: Task, client_owner):
-    response = client_owner.get(f"/api/v1/tasks/aaa/")
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    @pytest.mark.parametrize(
+        "client_fixture, expected_status",
+        [
+            (client_admin, status.HTTP_404_NOT_FOUND),
+            (client_user, status.HTTP_404_NOT_FOUND),
+            (client_owner, status.HTTP_404_NOT_FOUND),
+        ],
+    )
+    def test_failed_get_task_by_id(self, client_fixture, expected_status, request):
+        client = request.getfixturevalue(client_fixture.__name__)
+        response = client.get("/api/v1/tasks/aaa/")
+        assert response.status_code == expected_status
