@@ -1,5 +1,6 @@
+import uuid
+
 import pytest
-from api.tests.e2e.payload_for_tests import payload_admin, payload_owner, payload_user
 from auth.jwt_service.jwt_code import JWTGenerator
 from core.settings import ALGORITMS, SECRET_KEY
 from dotenv import load_dotenv
@@ -8,6 +9,43 @@ from rest_framework.test import APIClient
 from tasks.factories.task import TaskFactory
 
 load_dotenv()
+
+
+@pytest.fixture
+def payload_base():
+    return {
+        "sub": "1234567890",
+        "name": "John Doe",
+        "uuid": str(uuid.uuid4()),
+        "role": "user",
+        "permissions": [],
+    }
+
+
+@pytest.fixture
+def payload_admin(payload_base):
+    payload_base["role"] = "admin"
+    return payload_base
+
+
+@pytest.fixture
+def payload_user(payload_base):
+    payload_base["permissions"] = [
+        "project_create",
+        "task_create",
+        "project_read",
+        "task_read",
+        "project_update",
+        "task_update",
+        "project_delete",
+        "task_delete",
+    ]
+    return payload_base
+
+
+@pytest.fixture
+def payload_owner(payload_base):
+    return payload_base
 
 
 @pytest.fixture
@@ -21,24 +59,26 @@ def task():
 
 
 @pytest.fixture()
-def client_admin():
+def client():
+    return APIClient()
+
+
+@pytest.fixture()
+def client_admin(client, payload_admin):
     token_admin = JWTGenerator(SECRET_KEY, ALGORITMS).jwt_code(payload_admin)
-    client_admin = APIClient()
-    client_admin.credentials(HTTP_AUTHORIZATION=("Bearer " + token_admin))
-    return client_admin
+    client.credentials(HTTP_AUTHORIZATION=("Bearer " + token_admin))
+    return client
 
 
 @pytest.fixture()
-def client_user():
+def client_user(client, payload_user):
     token_user = JWTGenerator(SECRET_KEY, ALGORITMS).jwt_code(payload_user)
-    client_user = APIClient()
-    client_user.credentials(HTTP_AUTHORIZATION=f"Bearer {token_user}")
-    return client_user
+    client.credentials(HTTP_AUTHORIZATION=f"Bearer {token_user}")
+    return client
 
 
 @pytest.fixture()
-def client_owner():
+def client_owner(client, payload_owner):
     token_owner = JWTGenerator(SECRET_KEY, ALGORITMS).jwt_code(payload_owner)
-    client_owner = APIClient()
-    client_owner.credentials(HTTP_AUTHORIZATION=f"Bearer {token_owner}")
-    return client_owner
+    client.credentials(HTTP_AUTHORIZATION=f"Bearer {token_owner}")
+    return client
