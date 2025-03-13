@@ -19,7 +19,7 @@ def test_delete_task_user(task, client_user):
 @pytest.mark.django_db
 def test_delete_task_owner(task, client_owner):
     response = client_owner.delete(f"/api/v1/tasks/{task.id}/")
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_204_NO_CONTENT
 
 
 @pytest.mark.django_db

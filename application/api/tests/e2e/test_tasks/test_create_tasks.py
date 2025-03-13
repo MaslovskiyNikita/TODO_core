@@ -16,6 +16,7 @@ def test_create_task_admin(task: Task, project: Project, client_admin):
         "status": "asdasd",
         "due_date": datetime.datetime.now().isoformat(),
         "project": project.id,
+        "owner": str(uuid.uuid4()),
         "assigned_to": str(uuid.uuid4()),
     }
     response = client_admin.post("/api/v1/tasks/", data=data)
@@ -30,6 +31,7 @@ def test_create_task_user(task: Task, project: Project, client_user):
         "status": "asdasd",
         "due_date": datetime.datetime.now().isoformat(),
         "project": project.id,
+        "owner": str(uuid.uuid4()),
         "assigned_to": str(uuid.uuid4()),
     }
     response = client_user.post("/api/v1/tasks/", data=data)
@@ -44,6 +46,7 @@ def test_create_task_owner(task: Task, project: Project, client_owner):
         "status": "asdasd",
         "due_date": datetime.datetime.now().isoformat(),
         "project": project.id,
+        "owner": str(uuid.uuid4()),
         "assigned_to": str(uuid.uuid4()),
     }
     response = client_owner.post("/api/v1/tasks/", data=data)

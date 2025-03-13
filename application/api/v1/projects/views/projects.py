@@ -1,4 +1,4 @@
-from api.v1.permissions.permissions import IsUserAdmin, IsUserAdminOrOwner, IsUserOwner
+from api.v1.permissions.permissions import IsUserAdmin, IsUserOwner
 from api.v1.projects.permissions import HasProjectsPermissions
 from api.v1.projects.serializers.project_serializer import ProjectSerializer
 from auth.choices.roles import Role
@@ -14,8 +14,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     permission_class_by_action = {
         "update": [IsUserOwner | HasProjectsPermissions | IsUserAdmin],
-        "partial_update": [HasProjectsPermissions | IsUserAdminOrOwner],
-        "destroy": [HasProjectsPermissions | IsUserAdminOrOwner],
+        "partial_update": [HasProjectsPermissions | IsUserAdmin | IsUserOwner],
+        "destroy": [HasProjectsPermissions | IsUserAdmin | IsUserOwner],
     }
 
     def get_queryset(self):

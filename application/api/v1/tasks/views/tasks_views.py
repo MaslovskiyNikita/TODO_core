@@ -1,5 +1,5 @@
 from api.v1.filters.filters import TaskFilter
-from api.v1.permissions.permissions import IsUserAdminOrOwner
+from api.v1.permissions.permissions import IsUserAdmin, IsUserOwner
 from api.v1.tasks.permissions import HasTasksPermissions
 from api.v1.tasks.serializers.task import TaskSerializer
 from auth.choices.permission_pool import PermissionPool
@@ -21,9 +21,11 @@ class TaskViews(viewsets.ModelViewSet):
     ordering = ["created_at"]
 
     permission_class_by_action = {
-        "update": [HasTasksPermissions | IsUserAdminOrOwner],
-        "partial_update": [IsAuthenticated | HasTasksPermissions],
-        "destroy": [HasTasksPermissions | IsUserAdminOrOwner],
+        "update": [IsUserOwner | HasTasksPermissions | IsUserAdmin],
+        "partial_update": [
+            IsUserOwner | IsAuthenticated | HasTasksPermissions | IsUserAdmin
+        ],
+        "perform_destroy": [HasTasksPermissions | IsUserAdmin | IsUserOwner],
     }
 
     def get_queryset(self):
@@ -33,6 +35,8 @@ class TaskViews(viewsets.ModelViewSet):
             return Task.objects.filter(
                 Q(subscribers__user=self.request.user_data.uuid)
                 | Q(project__owner=self.request.user_data.uuid)
+                | Q(assigned_to=self.request.user_data.uuid)
+                | Q(owner=self.request.user_data.uuid)
             )
 
     def get_permissions(self):

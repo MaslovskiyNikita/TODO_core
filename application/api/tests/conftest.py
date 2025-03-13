@@ -31,6 +31,12 @@ def payload_admin(payload_base):
 
 @pytest.fixture
 def payload_user(payload_base):
+    return payload_base
+
+
+@pytest.fixture
+def payload_owner(payload_base):
+    payload_base["uuid"] = "7cbff8ff-41c7-48ef-b962-99cc6db81593"
     payload_base["permissions"] = [
         "project_create",
         "task_create",
@@ -41,11 +47,6 @@ def payload_user(payload_base):
         "project_delete",
         "task_delete",
     ]
-    return payload_base
-
-
-@pytest.fixture
-def payload_owner(payload_base):
     return payload_base
 
 
@@ -81,5 +82,5 @@ def client_user(client, payload_user):
 @pytest.fixture()
 def client_owner(client, payload_owner):
     token_owner = JWTGenerator(SECRET_KEY, ALGORITMS).jwt_code(payload_owner)
-    client.credentials(HTTP_AUTHORIZATION=f"Bearer {token_owner}")
+    client.credentials(HTTP_AUTHORIZATION=f"Bearer " + token_owner)
     return client

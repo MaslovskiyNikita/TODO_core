@@ -16,6 +16,7 @@ def test_update_task_admin(task: Task, project: Project, client_admin):
         "status": "prikol",
         "due_date": datetime.datetime.now().isoformat(),
         "project": project.id,
+        "owner": str(uuid.uuid4()),
         "assigned_to": str(uuid.uuid4()),
     }
     response = client_admin.put(f"/api/v1/tasks/{task.id}/", data=data)
@@ -44,10 +45,11 @@ def test_update_task_owner(task: Task, project: Project, client_owner):
         "status": "prikol",
         "due_date": datetime.datetime.now().isoformat(),
         "project": project.id,
+        "owner": str(uuid.uuid4()),
         "assigned_to": str(uuid.uuid4()),
     }
     response = client_owner.put(f"/api/v1/tasks/{task.id}/", data=data)
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_200_OK
 
 
 @pytest.mark.django_db

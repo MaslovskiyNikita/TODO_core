@@ -13,6 +13,7 @@ class Task(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="tasks")
+    owner = models.UUIDField()
     assigned_to = models.UUIDField()
     is_archived = models.BooleanField(default=False)
 
