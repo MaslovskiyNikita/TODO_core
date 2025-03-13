@@ -1,8 +1,7 @@
 import pytest
+from api.tests.conftest import client_admin, client_owner, client_user
 from projects.models import Project
 from rest_framework import status
-
-from ...conftest import client_admin, client_owner, client_user
 
 
 @pytest.mark.django_db

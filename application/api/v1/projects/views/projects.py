@@ -1,11 +1,5 @@
-from api.v1.projects.permissions import (
-    IsAuthenticated,
-    IsUserAdmin,
-    IsUserAdminOrOwner,
-    IsUserCanDelete,
-    IsUserCanUpdate,
-    IsUserOwner,
-)
+from api.v1.permissions.permissions import IsUserAdmin, IsUserAdminOrOwner, IsUserOwner
+from api.v1.projects.permissions import HasProjectsPermissions
 from api.v1.projects.serializers.project_serializer import ProjectSerializer
 from auth.choices.roles import Role
 from django.db.models import Q
@@ -19,9 +13,9 @@ class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
 
     permission_class_by_action = {
-        "update": [IsUserOwner | IsUserCanUpdate | IsUserAdmin],
-        "partial_update": [IsUserCanUpdate | IsUserAdminOrOwner],
-        "destroy": [IsUserCanDelete | IsUserAdminOrOwner],
+        "update": [IsUserOwner | HasProjectsPermissions | IsUserAdmin],
+        "partial_update": [HasProjectsPermissions | IsUserAdminOrOwner],
+        "destroy": [HasProjectsPermissions | IsUserAdminOrOwner],
     }
 
     def get_queryset(self):
@@ -46,16 +40,6 @@ class ProjectViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
+    def perform_destroy(self, instance):
         instance.is_archived = True
-        serializer = self.get_serializer(
-            instance, data={"is_archived": instance.is_archived}, partial=True
-        )
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
-        if getattr(instance, "_prefetched_objects_cache", None):
-            instance._prefetched_objects_cache = {}
-
-        return Response(serializer.data, status=204)
+        instance.save()

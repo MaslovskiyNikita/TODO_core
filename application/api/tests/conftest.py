@@ -1,6 +1,7 @@
 import uuid
 
 import pytest
+from auth.choices.roles import Role
 from auth.jwt_service.jwt_code import JWTGenerator
 from core.settings import ALGORITMS, SECRET_KEY
 from dotenv import load_dotenv
@@ -17,14 +18,14 @@ def payload_base():
         "sub": "1234567890",
         "name": "John Doe",
         "uuid": str(uuid.uuid4()),
-        "role": "user",
+        "role": Role.USER.value,
         "permissions": [],
     }
 
 
 @pytest.fixture
 def payload_admin(payload_base):
-    payload_base["role"] = "admin"
+    payload_base["role"] = Role.ADMIN.value
     return payload_base
 
 

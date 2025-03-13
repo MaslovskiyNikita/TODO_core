@@ -1,14 +1,13 @@
 import pytest
+from api.tests.conftest import client_admin, client_owner, client_user
 from rest_framework import status
 from tasks.models import Task
-
-from ...conftest import client_admin, client_owner, client_user
 
 
 @pytest.mark.django_db
 def test_delete_task_admin(task, client_admin):
     response = client_admin.delete(f"/api/v1/tasks/{task.id}/")
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_204_NO_CONTENT
 
 
 @pytest.mark.django_db
