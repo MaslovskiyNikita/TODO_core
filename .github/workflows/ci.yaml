@@ -5,22 +5,22 @@ on:
     branches:
       - main
       - dev
-      - features/setup
   pull_request:
     branches:
       - main
       - dev
-      - features/setup
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - uses: actions/checkout@v4
-      - uses: isort/isort-action@v1
+      - name: Isort  
+        uses: isort/isort-action@v1
+        with:
+          configuration: "--check-only --diff --profile=black"
 
       - name: Run black
         uses: psf/black@stable
@@ -29,4 +29,37 @@ jobs:
         uses: sasanquaneuf/mypy-github-action@releases/v1
         with:
           checkName: 'mypy'
+  
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create .env file      
+        run: |
+            echo "${{ secrets.env }}" >> .env
+
+      - name: Docker up
+        run: |
+          docker compose up -d
+          
+    
+      - name: Run tests with pytest
+        run: |
+          docker compose exec web poetry run pytest application/ --cov --cov-report=xml
+  
+      - name: Install diff-cover
+        run: |
+          pip install diff-cover    
+  
+      - name: Run diff-cover
+        run: |
+          diff-cover coverage.xml --compare-branch=origin/${{ github.base_ref }}   
+
+          
+  
+  
 

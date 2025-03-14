@@ -9,6 +9,16 @@ psycopg2-binary = "^2.9.10"
 mypy = "^1.15.0"
 djangorestframework = "^3.15.2"
 python-dotenv = "^1.0.1"
+djangorestframework-simplejwt = "^5.4.0"
+pyjwt = "^2.10.1"
+django-filter = "^25.1"
+pytest = "^8.3.5"
+requests = "^2.32.3"
+factory-boy = "^3.3.3"
+pytest-django = "^4.10.0"
+pytest-factoryboy = "^2.7.0"
+pytest-cov = "^6.0.0"
+diff-cover = "^9.2.4"
 
 
 [tool.poetry.group.dev.dependencies]
