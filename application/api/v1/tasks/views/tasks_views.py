@@ -1,12 +1,13 @@
 from api.v1.filters.filters import TaskFilter
 from api.v1.permissions.permissions import IsUserAdmin, IsUserOwner
 from api.v1.tasks.permissions import HasTasksPermissions
+from api.v1.tasks.serializers.subscriber import TaskSubscriberSerializer
 from api.v1.tasks.serializers.task import TaskSerializer
-from auth.choices.permission_pool import PermissionPool
 from auth.choices.roles import Role
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from tasks.models.task_model import Task
@@ -38,6 +39,27 @@ class TaskViews(viewsets.ModelViewSet):
                 | Q(assigned_to=self.request.user_data.uuid)
                 | Q(owner=self.request.user_data.uuid)
             )
+
+    @action(detail=True, methods=["post"])
+    def subscribe_on_task(self, request, pk=None):
+
+        task = self.get_object()
+
+        if not (
+            task.owner == request.user_data.uuid
+            or request.user_data.role == Role.ADMIN.value
+        ):
+            "Проверка на права добавления пользователя"
+            return status.HTTP_403_FORBIDDEN
+
+        data = request.data.copy()
+        data["task"] = task.id
+
+        serializer = TaskSubscriberSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get_permissions(self):
         permissions_classes = self.permission_class_by_action.get(self.action, [])
