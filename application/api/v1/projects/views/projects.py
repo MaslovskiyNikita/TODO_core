@@ -20,12 +20,14 @@ class ProjectViewSet(viewsets.ModelViewSet):
         "update": [IsUserOwner | HasProjectsPermissions | IsUserAdmin],
         "partial_update": [HasProjectsPermissions | IsUserAdmin | IsUserOwner],
         "destroy": [HasProjectsPermissions | IsUserAdmin | IsUserOwner],
-        "add_user_to_project": [IsUserOwner | IsUserAdmin],
+        "members": [IsUserOwner | IsUserAdmin],
+        "update_member": [IsUserOwner | IsUserAdmin],
+        "delete_member": [IsUserOwner | IsUserAdmin],
     }
 
     def get_queryset(self):
         if self.request.user_data.role == Role.ADMIN.value:
-            return Project.objects.filter(is_archived=False)
+            return Project.objects.filter()
         else:
             return Project.objects.filter(
                 Q(members__user=self.request.user_data.uuid)
@@ -33,31 +35,46 @@ class ProjectViewSet(viewsets.ModelViewSet):
             )
 
     @action(detail=True, methods=["post"])
-    def add_user_to_project(self, request, pk=None):
+    def members(self, request, pk=None):
 
         project = self.get_object()
-
-        if not (
-            project.owner == request.user_data.uuid
-            or request.user_data.role == Role.ADMIN.value
-        ):
-            "Проверка на права добавления пользователя"
-            return status.HTTP_403_FORBIDDEN
 
         data = request.data.copy()
         data["project"] = project.id
         user_uuid = data.get("user")
 
         if ProjectMember.objects.filter(project=project, user=user_uuid).exists():
-            "Проверка на то что есть ли пользователь уже в проекте"
-            return status.HTTP_409_CONFLICT
+            return status.HTTP_404_NOT_FOUND
 
-        print(data)
         serializer = ProjectMemberSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["delete"])
+    def delete_member(self, request, pk=None):
+
+        project = self.get_object()
+
+        user_to_delete = request.query_params.get("user_to_delete")
+
+        member = ProjectMember.objects.get(project=project, user=user_to_delete)
+        member.delete()
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+    @action(detail=True, methods=["put", "patch"])
+    def update_member(self, request, pk=None):
+        project = self.get_object()
+
+        data = request.data.copy()
+        data["project"] = project.id
+
+        serializer = ProjectMemberSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def get_permissions(self):
         permissions_classes = self.permission_class_by_action.get(self.action, [])

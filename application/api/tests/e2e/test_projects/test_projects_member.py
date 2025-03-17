@@ -7,39 +7,48 @@ from rest_framework import status
 
 
 @pytest.mark.django_db
-class TestCreateMemberProjectAPI:
-    @pytest.mark.parametrize(
-        "client_fixture, expected_status",
-        [
-            (client_admin, status.HTTP_201_CREATED),
-        ],
-    )
-    def test_add_member_project(
-        self, client_fixture, expected_status, request, project
-    ):
-        client = request.getfixturevalue(client_fixture.__name__)
-        data = {"user": str(uuid.uuid4()), "role": "user"}
-        response = client.post(
-            f"/api/v1/projects/{project.id}/add_user_to_project/", data=data
-        )
-        assert response.status_code == expected_status
+@pytest.mark.parametrize(
+    "client_fixture_name, expected_status, role",
+    [
+        ("client_admin", status.HTTP_201_CREATED, "redactor"),
+        ("client_admin", status.HTTP_201_CREATED, "viewer"),
+        ("client_admin", status.HTTP_400_BAD_REQUEST, "user"),
+        ("client_user", status.HTTP_404_NOT_FOUND, "redactor"),
+        ("client_user", status.HTTP_404_NOT_FOUND, "viewer"),
+        ("client_user", status.HTTP_404_NOT_FOUND, "user"),
+        ("client_owner", status.HTTP_201_CREATED, "redactor"),
+        ("client_owner", status.HTTP_201_CREATED, "viewer"),
+        ("client_owner", status.HTTP_400_BAD_REQUEST, "user"),
+    ],
+)
+def test_add_member_project(
+    client_fixture_name, expected_status, role, request, project: Project
+):
 
-        assert expected_status == status.HTTP_201_CREATED
+    client = request.getfixturevalue(client_fixture_name)
 
-    @pytest.mark.parametrize(
-        "client_fixture, expected_status",
-        [
-            (client_admin, status.HTTP_400_BAD_REQUEST),
-            (client_user, status.HTTP_404_NOT_FOUND),
-            (client_owner, status.HTTP_404_NOT_FOUND),
-        ],
-    )
-    def test_failed_add_member_project(
-        self, client_fixture, expected_status, request, project
-    ):
-        client = request.getfixturevalue(client_fixture.__name__)
-        data: dict = {}
-        response = client.post(
-            f"/api/v1/projects/{project.id}/add_user_to_project/", data=data
-        )
-        assert response.status_code == expected_status
+    data = {"user": str(uuid.uuid4()), "role": role}
+
+    response = client.post(f"/api/v1/projects/{project.id}/members/", data=data)
+
+    assert response.status_code == expected_status
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "client_fixture_name, expected_status",
+    [
+        ("client_admin", status.HTTP_400_BAD_REQUEST),
+        ("client_user", status.HTTP_404_NOT_FOUND),
+        ("client_owner", status.HTTP_400_BAD_REQUEST),
+    ],
+)
+def test_failed_add_member_project(
+    client_fixture_name, expected_status, request, project: Project
+):
+
+    client = request.getfixturevalue(client_fixture_name)
+
+    response = client.post(f"/api/v1/projects/{project.id}/members/", data={})
+
+    assert response.status_code == expected_status
