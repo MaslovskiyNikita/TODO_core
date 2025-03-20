@@ -10,7 +10,7 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from tasks.models.task_model import Task
+from tasks.models.task_model import Subscriber, Task
 
 
 class TaskViews(viewsets.ModelViewSet):
@@ -40,20 +40,16 @@ class TaskViews(viewsets.ModelViewSet):
                 | Q(owner=self.request.user_data.uuid)
             )
 
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], url_path="subscribers")
     def subscribe_on_task(self, request, pk=None):
 
         task = self.get_object()
 
-        if not (
-            task.owner == request.user_data.uuid
-            or request.user_data.role == Role.ADMIN.value
-        ):
-            "Проверка на права добавления пользователя"
-            return status.HTTP_403_FORBIDDEN
-
         data = request.data.copy()
         data["task"] = task.id
+
+        if Subscriber.objects.filter(user=request.user_data.uuid).exists():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
         serializer = TaskSubscriberSerializer(data=data)
         serializer.is_valid(raise_exception=True)

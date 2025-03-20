@@ -19,6 +19,8 @@ pytest-django = "^4.10.0"
 pytest-factoryboy = "^2.7.0"
 pytest-cov = "^6.0.0"
 diff-cover = "^9.2.4"
+django-rest-framework-nested = "^0.0.1"
+drf-nested-routers = "^0.94.1"
 
 
 [tool.poetry.group.dev.dependencies]

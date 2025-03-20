@@ -2,7 +2,7 @@ import uuid
 
 import pytest
 from api.tests.conftest import client_admin, client_owner, client_user
-from projects.models import Project
+from projects.models import Project, ProjectMember
 from rest_framework import status
 
 
@@ -22,16 +22,26 @@ from rest_framework import status
     ],
 )
 def test_add_member_project(
-    client_fixture_name, expected_status, role, request, project: Project
+    client_fixture_name,
+    expected_status,
+    role,
+    request,
+    project: Project,
+    project_member: ProjectMember,
 ):
 
     client = request.getfixturevalue(client_fixture_name)
 
-    data = {"user": str(uuid.uuid4()), "role": role}
+    user = str(uuid.uuid4())
+
+    data = {"user": user, "role": role}
 
     response = client.post(f"/api/v1/projects/{project.id}/members/", data=data)
 
     assert response.status_code == expected_status
+
+    if response.status_code == status.HTTP_201_CREATED:
+        assert ProjectMember.objects.filter(user=user).exists()
 
 
 @pytest.mark.django_db

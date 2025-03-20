@@ -45,13 +45,15 @@ def payload_base():
 
 
 @pytest.fixture
-def payload_admin(payload_base):
+def payload_admin(payload_base, project_member):
+    payload_base["uuid"] = project_member.user
     payload_base["role"] = Role.ADMIN.value
     return payload_base
 
 
 @pytest.fixture
 def payload_user(payload_base):
+    payload_base["permissions"] = []
     return payload_base
 
 

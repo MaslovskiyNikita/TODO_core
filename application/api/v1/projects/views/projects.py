@@ -1,5 +1,11 @@
 from api.v1.permissions.permissions import IsUserAdmin, IsUserOwner
-from api.v1.projects.permissions import HasProjectsPermissions
+from api.v1.projects.permissions import (
+    AddProjectMember,
+    DeleteProjectMember,
+    HasProjectsPermissions,
+    PatchProjectMember,
+    PutProjectMember,
+)
 from api.v1.projects.serializers.project_member_serializer import (
     ProjectMemberSerializer,
 )
@@ -9,6 +15,7 @@ from django.db.models import Q
 from projects.models import Project, ProjectMember
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 
@@ -20,22 +27,38 @@ class ProjectViewSet(viewsets.ModelViewSet):
         "update": [IsUserOwner | HasProjectsPermissions | IsUserAdmin],
         "partial_update": [HasProjectsPermissions | IsUserAdmin | IsUserOwner],
         "destroy": [HasProjectsPermissions | IsUserAdmin | IsUserOwner],
-        "members": [IsUserOwner | IsUserAdmin],
-        "update_member": [IsUserOwner | IsUserAdmin],
-        "delete_member": [IsUserOwner | IsUserAdmin],
+        "add_member": [IsUserOwner | IsUserAdmin | AddProjectMember],
+        "put_member": [IsUserOwner | IsUserAdmin | PutProjectMember],
+        "patch_member": [IsUserOwner | IsUserAdmin | PatchProjectMember],
+        "delete_member": [IsUserOwner | IsUserAdmin | DeleteProjectMember],
     }
 
     def get_queryset(self):
         if self.request.user_data.role == Role.ADMIN.value:
-            return Project.objects.filter()
+            return Project.objects.filter(is_archived=False)
         else:
             return Project.objects.filter(
-                Q(members__user=self.request.user_data.uuid)
-                | Q(owner=self.request.user_data.uuid)
+                (
+                    Q(members__user=self.request.user_data.uuid)
+                    | Q(owner=self.request.user_data.uuid)
+                )
+                & Q(is_archived=False)
             )
 
-    @action(detail=True, methods=["post"])
-    def members(self, request, pk=None):
+    @action(methods="get", detail=False, url_path="list_members")
+    def list_members(self, request):
+        return ProjectMember.objects.all()
+
+    @action(methods=[], detail=True, url_path="members")
+    def members(self, request, pk):
+        pass
+
+    @action(methods=[], detail=True, url_path="members/(?P<user_pk>[^/.]+)")
+    def members_detail(self, request, user_pk):
+        pass
+
+    @members.mapping.post
+    def add_member(self, request, pk=None):
 
         project = self.get_object()
 
@@ -44,7 +67,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
         user_uuid = data.get("user")
 
         if ProjectMember.objects.filter(project=project, user=user_uuid).exists():
-            return status.HTTP_404_NOT_FOUND
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
         serializer = ProjectMemberSerializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -52,29 +75,51 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=["delete"])
-    def delete_member(self, request, pk=None):
+    @members_detail.mapping.delete
+    def delete_member(self, request, pk=None, user_pk=None):
 
         project = self.get_object()
 
-        user_to_delete = request.query_params.get("user_to_delete")
+        if not ProjectMember.objects.filter(project=project, user=user_pk).exists():
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
-        member = ProjectMember.objects.get(project=project, user=user_to_delete)
+        member = ProjectMember.objects.get(project=project, user=user_pk)
         member.delete()
-        return Response(status=status.HTTP_202_ACCEPTED)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=["put", "patch"])
-    def update_member(self, request, pk=None):
+    @members_detail.mapping.put
+    def update_member(self, request, pk=None, user_pk=None):
         project = self.get_object()
 
-        data = request.data.copy()
-        data["project"] = project.id
+        try:
+            member = ProjectMember.objects.get(project=project, user=user_pk)
+        except ProjectMember.DoesNotExist:
+            raise NotFound("Member not found")
 
-        serializer = ProjectMemberSerializer(data=data)
+        serializer = ProjectMemberSerializer(
+            instance=member, data=request.data, partial=True
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data)
+
+    @members.mapping.patch
+    def member_patch(self, request, pk=None):
+        project = self.get_object()
+
+        try:
+            member = ProjectMember.objects.get(project=project, user=user_pk)
+        except ProjectMember.DoesNotExist:
+            raise NotFound("Member not found")
+
+        serializer = ProjectMemberSerializer(
+            instance=member, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
 
     def get_permissions(self):
         permissions_classes = self.permission_class_by_action.get(self.action, [])

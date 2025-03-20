@@ -21,7 +21,7 @@ def test_create_subscriber(
 ):
     client = request.getfixturevalue(client_fixture_name)
     data = {"user": str(uuid.uuid4())}
-    response = client.post(f"/api/v1/tasks/{task.id}/subscribe_on_task/", data=data)
+    response = client.post(f"/api/v1/tasks/{task.id}/subscribers/", data=data)
     assert response.status_code == expected_status
 
 

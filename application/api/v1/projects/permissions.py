@@ -7,6 +7,10 @@ permissions_on_action = {
     "read": PermissionPool.PROJECT_READ.value,
     "update": PermissionPool.PROJECT_UPDATE.value,
     "destroy": PermissionPool.PROJECT_DESTROY.value,
+    "add_member": PermissionPool.PROJECT_ADD_MEMBER.value,
+    "put_member": PermissionPool.PROJECT_UPDATE_MEMBER.value,
+    "patch_member": PermissionPool.PROJECT_UPDATE_MEMBER.value,
+    "delete_member": PermissionPool.PROJECT_DELETE_MEMBER.value,
 }
 
 
@@ -18,3 +22,23 @@ class HasProjectsPermissions(BasePermission):
                 for perm in permissions_on_action.get(view.action)
             )
         return False
+
+
+class AddProjectMember(HasProjectsPermissions):
+    def add_member(self, request, view):
+        return self.has_permission(request=request, view=view)
+
+
+class PutProjectMember(HasProjectsPermissions):
+    def put_member(self, request, view):
+        return self.has_permission(request=request, view=view)
+
+
+class PatchProjectMember(HasProjectsPermissions):
+    def patch_member(self, request, view):
+        return self.has_permission(request=request, view=view)
+
+
+class DeleteProjectMember(HasProjectsPermissions):
+    def delete_member(self, request, view):
+        return self.has_permission(request=request, view=view)
