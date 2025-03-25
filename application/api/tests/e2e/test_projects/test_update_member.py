@@ -30,6 +30,7 @@ def test_update_member(
     client = request.getfixturevalue(client_fixture_name)
 
     data = {
+        "project": project.id,
         "role": role,
     }
 

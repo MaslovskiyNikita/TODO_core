@@ -22,23 +22,3 @@ class HasProjectsPermissions(BasePermission):
                 for perm in permissions_on_action.get(view.action)
             )
         return False
-
-
-class AddProjectMember(HasProjectsPermissions):
-    def add_member(self, request, view):
-        return self.has_permission(request=request, view=view)
-
-
-class PutProjectMember(HasProjectsPermissions):
-    def put_member(self, request, view):
-        return self.has_permission(request=request, view=view)
-
-
-class PatchProjectMember(HasProjectsPermissions):
-    def patch_member(self, request, view):
-        return self.has_permission(request=request, view=view)
-
-
-class DeleteProjectMember(HasProjectsPermissions):
-    def delete_member(self, request, view):
-        return self.has_permission(request=request, view=view)

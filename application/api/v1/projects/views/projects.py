@@ -1,21 +1,15 @@
 from api.v1.permissions.permissions import IsUserAdmin, IsUserOwner
-from api.v1.projects.permissions import (
-    AddProjectMember,
-    DeleteProjectMember,
-    HasProjectsPermissions,
-    PatchProjectMember,
-    PutProjectMember,
-)
+from api.v1.projects.permissions import HasProjectsPermissions
 from api.v1.projects.serializers.project_member_serializer import (
     ProjectMemberSerializer,
 )
 from api.v1.projects.serializers.project_serializer import ProjectSerializer
 from auth.choices.roles import Role
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from projects.models import Project, ProjectMember
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 
@@ -27,10 +21,10 @@ class ProjectViewSet(viewsets.ModelViewSet):
         "update": [IsUserOwner | HasProjectsPermissions | IsUserAdmin],
         "partial_update": [HasProjectsPermissions | IsUserAdmin | IsUserOwner],
         "destroy": [HasProjectsPermissions | IsUserAdmin | IsUserOwner],
-        "add_member": [IsUserOwner | IsUserAdmin | AddProjectMember],
-        "put_member": [IsUserOwner | IsUserAdmin | PutProjectMember],
-        "patch_member": [IsUserOwner | IsUserAdmin | PatchProjectMember],
-        "delete_member": [IsUserOwner | IsUserAdmin | DeleteProjectMember],
+        "add_member": [IsUserOwner | IsUserAdmin | HasProjectsPermissions],
+        "put_member": [IsUserOwner | IsUserAdmin | HasProjectsPermissions],
+        "patch_member": [IsUserOwner | IsUserAdmin | HasProjectsPermissions],
+        "delete_member": [IsUserOwner | IsUserAdmin | HasProjectsPermissions],
     }
 
     def get_queryset(self):
@@ -45,7 +39,11 @@ class ProjectViewSet(viewsets.ModelViewSet):
                 & Q(is_archived=False)
             )
 
-    @action(methods="get", detail=False, url_path="list_members")
+    def get_permissions(self):
+        permissions_classes = self.permission_class_by_action.get(self.action, [])
+        return [permissions() for permissions in permissions_classes]
+
+    @action(methods=["get"], detail=False, url_path="members")
     def list_members(self, request):
         return ProjectMember.objects.all()
 
@@ -59,9 +57,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     @members.mapping.post
     def add_member(self, request, pk=None):
-
         project = self.get_object()
-
         data = request.data.copy()
         data["project"] = project.id
         user_uuid = data.get("user")
@@ -72,59 +68,32 @@ class ProjectViewSet(viewsets.ModelViewSet):
         serializer = ProjectMemberSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @members_detail.mapping.delete
     def delete_member(self, request, pk=None, user_pk=None):
-
         project = self.get_object()
-
-        if not ProjectMember.objects.filter(project=project, user=user_pk).exists():
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        member = ProjectMember.objects.get(project=project, user=user_pk)
+        member = get_object_or_404(ProjectMember, project=project, user=user_pk)
         member.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    def _update_member(self, request, pk, user_pk, partial):
+        project = self.get_object()
+        member = get_object_or_404(ProjectMember, project=project, user=user_pk)
+        serializer = ProjectMemberSerializer(
+            instance=member, data=request.data, partial=partial
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
     @members_detail.mapping.put
     def update_member(self, request, pk=None, user_pk=None):
-        project = self.get_object()
+        return self._update_member(request, pk, user_pk, partial=False)
 
-        try:
-            member = ProjectMember.objects.get(project=project, user=user_pk)
-        except ProjectMember.DoesNotExist:
-            raise NotFound("Member not found")
-
-        serializer = ProjectMemberSerializer(
-            instance=member, data=request.data, partial=True
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(serializer.data)
-
-    @members.mapping.patch
-    def member_patch(self, request, pk=None):
-        project = self.get_object()
-
-        try:
-            member = ProjectMember.objects.get(project=project, user=user_pk)
-        except ProjectMember.DoesNotExist:
-            raise NotFound("Member not found")
-
-        serializer = ProjectMemberSerializer(
-            instance=member, data=request.data, partial=True
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(serializer.data)
-
-    def get_permissions(self):
-        permissions_classes = self.permission_class_by_action.get(self.action, [])
-
-        return [permissions() for permissions in permissions_classes]
+    @members_detail.mapping.patch
+    def member_patch(self, request, pk=None, user_pk=None):
+        return self._update_member(request, pk, user_pk, partial=True)
 
     def create(self, request, *args, **kwargs):
         data = request.data.copy()

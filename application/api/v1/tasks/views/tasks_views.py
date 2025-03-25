@@ -10,7 +10,7 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from tasks.models.task_model import Subscriber, Task
+from tasks.models.task_model import Task, TaskSubscriber
 
 
 class TaskViews(viewsets.ModelViewSet):
@@ -48,7 +48,7 @@ class TaskViews(viewsets.ModelViewSet):
         data = request.data.copy()
         data["task"] = task.id
 
-        if Subscriber.objects.filter(user=request.user_data.uuid).exists():
+        if TaskSubscriber.objects.filter(user=request.user_data.uuid).exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         serializer = TaskSubscriberSerializer(data=data)
