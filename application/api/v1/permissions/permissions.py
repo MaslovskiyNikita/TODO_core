@@ -13,8 +13,6 @@ class IsUserAdmin(BasePermission):
 
 
 class IsUserOwner(BasePermission):
-    def has_permission(self, request, view):
-        return hasattr(request, "user_data")
 
     def has_object_permission(self, request, view, obj):
-        return request.user_data.uuid == obj.owner
+        return str(request.user_data.uuid) == str(obj.owner)

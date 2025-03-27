@@ -1,15 +1,16 @@
 from api.v1.filters.filters import TaskFilter
 from api.v1.permissions.permissions import IsUserAdmin, IsUserOwner
 from api.v1.tasks.permissions import HasTasksPermissions
+from api.v1.tasks.serializers.subscriber import TaskSubscriberSerializer
 from api.v1.tasks.serializers.task import TaskSerializer
-from auth.choices.permission_pool import PermissionPool
 from auth.choices.roles import Role
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from tasks.models.task_model import Task
+from tasks.models.task_model import Task, TaskSubscriber
 
 
 class TaskViews(viewsets.ModelViewSet):
@@ -38,6 +39,23 @@ class TaskViews(viewsets.ModelViewSet):
                 | Q(assigned_to=self.request.user_data.uuid)
                 | Q(owner=self.request.user_data.uuid)
             )
+
+    @action(detail=True, methods=["post"], url_path="subscribers")
+    def subscribe_on_task(self, request, pk=None):
+
+        task = self.get_object()
+
+        data = request.data.copy()
+        data["task"] = task.id
+
+        if TaskSubscriber.objects.filter(user=request.user_data.uuid).exists():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = TaskSubscriberSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get_permissions(self):
         permissions_classes = self.permission_class_by_action.get(self.action, [])

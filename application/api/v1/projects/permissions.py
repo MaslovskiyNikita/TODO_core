@@ -7,6 +7,10 @@ permissions_on_action = {
     "read": PermissionPool.PROJECT_READ.value,
     "update": PermissionPool.PROJECT_UPDATE.value,
     "destroy": PermissionPool.PROJECT_DESTROY.value,
+    "add_member": PermissionPool.PROJECT_ADD_MEMBER.value,
+    "put_member": PermissionPool.PROJECT_UPDATE_MEMBER.value,
+    "patch_member": PermissionPool.PROJECT_UPDATE_MEMBER.value,
+    "delete_member": PermissionPool.PROJECT_DELETE_MEMBER.value,
 }
 
 

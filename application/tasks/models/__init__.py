@@ -1,1 +1,1 @@
-from tasks.models.task_model import Subscriber, Task
+from tasks.models.task_model import Task, TaskSubscriber

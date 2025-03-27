@@ -1,7 +1,9 @@
+import uuid
+
 import pytest
 from api.tests.conftest import client_admin, client_owner, client_user
+from projects.models import Project, ProjectMember
 from rest_framework import status
-from tasks.models import Task
 
 
 @pytest.mark.django_db
@@ -13,14 +15,19 @@ from tasks.models import Task
         ("client_owner", status.HTTP_204_NO_CONTENT),
     ],
 )
-def test_delete_task(
-    task: Task,
+def test_delete_member(
     client_fixture_name: str,
-    expected_status: int,
+    expected_status,
     request: pytest.FixtureRequest,
+    project,
+    project_member,
 ):
     client = request.getfixturevalue(client_fixture_name)
-    response = client.delete(f"/api/v1/tasks/{task.id}/")
+
+    response = client.delete(
+        f"/api/v1/projects/{project_member.project.id}/members/{project_member.user}/"
+    )
+
     assert response.status_code == expected_status
 
 
@@ -33,9 +40,19 @@ def test_delete_task(
         ("client_owner", status.HTTP_404_NOT_FOUND),
     ],
 )
-def test_failed_delete_task(
-    client_fixture_name: str, expected_status: int, request: pytest.FixtureRequest
+def test_failed_delete_member(
+    client_fixture_name: str,
+    expected_status: int,
+    request: pytest.FixtureRequest,
+    project: Project,
+    project_member,
 ):
     client = request.getfixturevalue(client_fixture_name)
-    response = client.delete("/api/v1/tasks/aaa/")
+
+    non_existent_user_uuid = str(uuid.uuid4())
+
+    response = client.delete(
+        f"/api/v1/projects/{project.id}/members/{non_existent_user_uuid}/"
+    )
+
     assert response.status_code == expected_status
