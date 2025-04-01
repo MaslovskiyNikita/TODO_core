@@ -5,6 +5,7 @@ from api.v1.projects.serializers.project_member_serializer import (
 )
 from api.v1.projects.serializers.project_serializer import ProjectSerializer
 from auth.choices.roles import Role
+from core.project_tasks.project_tasks import invite_user_to_project
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from projects.models import Project, ProjectMember
@@ -68,6 +69,9 @@ class ProjectViewSet(viewsets.ModelViewSet):
         serializer = ProjectMemberSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        invite_user_to_project.delay(user_uuid, project)
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @members_detail.mapping.delete

@@ -21,6 +21,7 @@ pytest-cov = "^6.0.0"
 diff-cover = "^9.2.4"
 redis = "^5.2.1"
 celery = "^5.4.0"
+django-celery-results = "^2.5.1"
 
 
 [tool.poetry.group.dev.dependencies]
