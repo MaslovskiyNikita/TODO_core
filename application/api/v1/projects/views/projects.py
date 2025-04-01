@@ -70,7 +70,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        invite_user_to_project.delay(user_uuid, project.id)
+        invite_user_to_project.delay(str(user_uuid), str(project.id))
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
