@@ -5,7 +5,8 @@ from projects.models.project_model import Project
 
 
 @app.task  # type: ignore[misc]
-def invite_user_to_project(member_id, project: Project) -> None:
+def invite_user_to_project(member_id, project_id) -> None:
+    project = Project.objects.get(id=project_id)
     # user = User.objects.get(id=member_id)
     send_mail(
         f"Invite to project {project.name}",
