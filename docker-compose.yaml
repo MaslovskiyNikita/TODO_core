@@ -37,7 +37,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: poetry run celery -A core.celery_core worker --loglevel=info -E
+    command: poetry run celery -A core worker --loglevel=info -E
     working_dir: /app/application
     env_file:
       - .env
@@ -53,7 +53,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: poetry run celery -A core.celery_core beat --loglevel=info
+    command: poetry run celery -A core beat --loglevel=info
     working_dir: /app/application
     env_file:
       - .env

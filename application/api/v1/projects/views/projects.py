@@ -5,9 +5,9 @@ from api.v1.projects.serializers.project_member_serializer import (
 )
 from api.v1.projects.serializers.project_serializer import ProjectSerializer
 from auth.choices.roles import Role
-from core.project_tasks.project_tasks import invite_user_to_project
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from projects.celery_tasks.project_tasks import invite_user_to_project
 from projects.models import Project, ProjectMember
 from rest_framework import status, viewsets
 from rest_framework.decorators import action

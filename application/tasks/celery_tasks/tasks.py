@@ -9,7 +9,7 @@ from projects.models.project_model import Project
 from tasks.models import Task, TaskSubscriber
 
 
-@shared_task(name="check_deadline")
+@shared_task
 def check_deadline():
     now = timezone.now()
     time_threshold = now + timedelta(hours=1)

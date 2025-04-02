@@ -172,7 +172,7 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "password")
 
 CELERY_BEAT_SCHEDULE = {
     "check-deadlines": {
-        "task": "check_deadline",
+        "task": "tasks.celery_tasks.tasks.check_deadline",
         "schedule": 60,
     },
 }

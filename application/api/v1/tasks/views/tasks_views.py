@@ -1,3 +1,6 @@
+import datetime
+from datetime import timedelta
+
 from api.v1.filters.filters import TaskFilter
 from api.v1.permissions.permissions import IsUserAdmin, IsUserOwner
 from api.v1.tasks.permissions import HasTasksPermissions
@@ -5,6 +8,7 @@ from api.v1.tasks.serializers.subscriber import TaskSubscriberSerializer
 from api.v1.tasks.serializers.task import TaskSerializer
 from auth.choices.roles import Role
 from django.db.models import Q
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -40,6 +44,11 @@ class TaskViews(viewsets.ModelViewSet):
                 | Q(owner=self.request.user_data.uuid)
             )
 
+    def get_permissions(self):
+        permissions_classes = self.permission_class_by_action.get(self.action, [])
+
+        return [permission() for permission in permissions_classes]
+
     @action(detail=True, methods=["post"], url_path="subscribers")
     def subscribe_on_task(self, request, pk=None):
 
@@ -57,10 +66,36 @@ class TaskViews(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def get_permissions(self):
-        permissions_classes = self.permission_class_by_action.get(self.action, [])
+    def perform_update(self, serializer):
+        due_date_str = serializer.validated_data.get("due_date")
+        if isinstance(due_date_str, str):
+            try:
+                due_date = datetime.fromisoformat(due_date_str)
+                if due_date > timezone.now() + datetime.timedelta(hours=1):
+                    serializer.validated_data["notification_sent"] = False
+            except ValueError:
+                raise Response(
+                    {"due_date": "Invalid date format."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
-        return [permission() for permission in permissions_classes]
+        serializer.save()
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs["partial"] = True
+        due_date_str = request.data.get("due_date")
+        if isinstance(due_date_str, str):
+            try:
+                due_date = datetime.fromisoformat(due_date_str)
+                if due_date > timezone.now() + datetime.timedelta(hours=1):
+                    request.data["notification_sent"] = False
+            except ValueError:
+                return Response(
+                    {"due_date": "Invalid date format."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        return self.update(request, *args, **kwargs)
 
     def perform_destroy(self, instance):
         instance.is_archived = True
