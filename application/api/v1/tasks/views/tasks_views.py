@@ -67,35 +67,10 @@ class TaskViews(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_update(self, serializer):
-        due_date_str = serializer.validated_data.get("due_date")
-        if isinstance(due_date_str, str):
-            try:
-                due_date = datetime.fromisoformat(due_date_str)
-                if due_date > timezone.now() + datetime.timedelta(hours=1):
-                    serializer.validated_data["notification_sent"] = False
-            except ValueError:
-                raise Response(
-                    {"due_date": "Invalid date format."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
+        due_date = serializer.validated_data.get("due_date")
+        if due_date > timezone.now() + datetime.timedelta(hours=1):
+            serializer.validated_data["notification_sent"] = False
         serializer.save()
-
-    def partial_update(self, request, *args, **kwargs):
-        kwargs["partial"] = True
-        due_date_str = request.data.get("due_date")
-        if isinstance(due_date_str, str):
-            try:
-                due_date = datetime.fromisoformat(due_date_str)
-                if due_date > timezone.now() + datetime.timedelta(hours=1):
-                    request.data["notification_sent"] = False
-            except ValueError:
-                return Response(
-                    {"due_date": "Invalid date format."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-        return self.update(request, *args, **kwargs)
 
     def perform_destroy(self, instance):
         instance.is_archived = True

@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo "Verifying email in LocalStack SES..."
+
 poetry run python application/manage.py makemigrations
 poetry run python application/manage.py migrate
 

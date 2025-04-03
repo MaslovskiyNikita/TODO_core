@@ -1,8 +1,6 @@
 services:
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile  
+    build: .
     command: ["./entrypoint.sh"]
     volumes:
       - .:/app
@@ -15,6 +13,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      localstack:
+        condition: service_started
 
   db:
     image: postgres:16
@@ -29,14 +29,12 @@ services:
       retries: 5
 
   redis:
-    image: redis:latest
+    image: redis:7.0
     env_file:
       - .env
 
   celery:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     command: poetry run celery -A core worker --loglevel=info -E
     working_dir: /app/application
     env_file:
@@ -50,9 +48,7 @@ services:
       - .:/app
 
   celery-beat:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     command: poetry run celery -A core beat --loglevel=info
     working_dir: /app/application
     env_file:
@@ -63,7 +59,21 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - .:/app
+      - .:/app    
+
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+      - "4510-4559:4510-4559"
+    command: ["./entrypoint_localstack.sh"]
+    environment:
+      - .env
+    volumes:
+      - ./entrypoint_localstack.sh:/app/entrypoint_localstack.sh
+      - ./volume/localstack:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+
 
 volumes:
   postgres_data:

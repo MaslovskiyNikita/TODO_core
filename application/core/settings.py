@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     "core",
     "projects",
     "tasks",
-    "django_celery_results",
 ]
 
 
@@ -154,11 +153,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
-CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True
 
@@ -171,7 +168,7 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "password")
 
 
 CELERY_BEAT_SCHEDULE = {
-    "check-deadlines": {
+    "check-task-deadlines-60-sec": {
         "task": "tasks.celery_tasks.tasks.check_deadline",
         "schedule": 60,
     },
