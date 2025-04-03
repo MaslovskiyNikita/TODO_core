@@ -2,7 +2,9 @@ import boto3
 
 
 class SesManager:
-    def get_ses_client(self):
+
+    @staticmethod
+    def get_ses_client():
         return boto3.client(
             "ses",
             region_name="us-east-1",
