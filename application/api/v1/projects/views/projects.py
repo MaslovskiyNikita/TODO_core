@@ -70,7 +70,9 @@ class ProjectViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        send_project_invitation_email.delay(str(user_uuid), str(project.id))
+        send_project_invitation_email.delay(
+            str(user_uuid), str(project.name), str(project.owner)
+        )
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

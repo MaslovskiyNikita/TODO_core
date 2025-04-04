@@ -66,13 +66,11 @@ services:
     ports:
       - "4566:4566"
       - "4510-4559:4510-4559"
-    command: ["./entrypoint_localstack.sh"]
-    environment:
+    entrypoint: /app/entrypoint_localstack.sh
+    env_file:
       - .env
     volumes:
       - ./entrypoint_localstack.sh:/app/entrypoint_localstack.sh
-      - ./volume/localstack:/var/lib/localstack
-      - /var/run/docker.sock:/var/run/docker.sock
 
 
 volumes:

@@ -8,20 +8,19 @@ from projects.models.project_model import Project
 
 
 @shared_task  # type: ignore[misc]
-def send_project_invitation_email(member_id, project_id) -> None:
-    project = Project.objects.get(id=project_id)
+def send_project_invitation_email(member_id, project_name, project_owner) -> None:
     ses_client = SesManager.get_ses_client()
 
     try:
-        ses_client.verify_email_identity(EmailAddress=EMAIL_HOST_USER)
+
         ses_client.send_email(
             Source=EMAIL_HOST_USER,
             Destination={"ToAddresses": ["nikitamaslovskiy999@gmail.com"]},  # user.mail
             Message={
-                "Subject": {"Data": f"Invite to project {project.name}"},
+                "Subject": {"Data": f"Invite to project {project_name}"},
                 "Body": {
                     "Text": {
-                        "Data": f"{project.owner} want you to invite this project {project.name}"
+                        "Data": f"{project_owner} want you to invite this project {project_name}"
                     }
                 },
             },

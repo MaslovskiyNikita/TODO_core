@@ -1,3 +1,7 @@
 #!/bin/sh
 
-awslocal --endpoint-url=http://localstack:4566 ses verify-email-identity --email-address your@email.com
+docker-entrypoint.sh &
+
+awslocal ses verify-email-identity --email-address "$EMAIL_HOST_USER"
+
+wait
