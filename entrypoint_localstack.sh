@@ -2,7 +2,10 @@
 
 docker-entrypoint.sh &
 
-sleep 10
+until curl -s http://localhost:4566/_localstack/health | grep -q '"ses": "available"'; do
+  echo "Waiting for LocalStack SES..."
+  sleep 2
+done
 
 awslocal ses verify-email-identity --email-address "$EMAIL_HOST_USER"
 
