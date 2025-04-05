@@ -1,4 +1,5 @@
-from aws.ses_manager import SesManager
+from aws.ses_manager import ses_manager
+from aws.templates.project_invitation import project_invitation_template
 from botocore.exceptions import ClientError
 from celery import shared_task
 from core.celery_core import app
@@ -9,21 +10,14 @@ from projects.models.project_model import Project
 
 @shared_task  # type: ignore[misc]
 def send_project_invitation_email(member_id, project_name, project_owner) -> None:
-    ses_client = SesManager.get_ses_client()
 
-    try:
+    template_data = project_invitation_template(
+        project_name=project_name, project_owner=project_owner
+    )
 
-        ses_client.send_email(
-            Source=EMAIL_HOST_USER,
-            Destination={"ToAddresses": ["nikitamaslovskiy999@gmail.com"]},  # user.mail
-            Message={
-                "Subject": {"Data": f"Invite to project {project_name}"},
-                "Body": {
-                    "Text": {
-                        "Data": f"{project_owner} want you to invite this project {project_name}"
-                    }
-                },
-            },
-        )
-    except ClientError as e:
-        print(f"SES Error: {e.response['Error']['Message']}")
+    ses_manager.send_templated_email(
+        source=EMAIL_HOST_USER,
+        destination=EMAIL_HOST_USER,
+        template_name="InviteNotificationTemplate",
+        template_data=template_data,
+    )

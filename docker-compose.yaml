@@ -70,8 +70,10 @@ services:
     env_file:
       - .env
     volumes:
+      - ./application/aws/ses_templates:/app/ses_templates 
       - ./entrypoint_localstack.sh:/app/entrypoint_localstack.sh
-
+    environment:  
+      - TEMPLATES_DIR=/app/ses_templates
 
 volumes:
   postgres_data:

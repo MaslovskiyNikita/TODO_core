@@ -68,7 +68,7 @@ class TaskViews(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         due_date = serializer.validated_data.get("due_date")
-        if due_date > timezone.now() + datetime.timedelta(hours=1):
+        if due_date != None:
             serializer.validated_data["notification_sent"] = False
         serializer.save()
 

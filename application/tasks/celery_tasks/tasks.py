@@ -1,14 +1,13 @@
+import json
 from datetime import timedelta
 
-import boto3
-from aws.ses_manager import SesManager
+from aws.ses_manager import ses_manager
+from aws.templates.deadline_notification import deadline_template_data
 from botocore.exceptions import ClientError
 from celery import shared_task
-from core.celery_core import app
 from core.settings import EMAIL_HOST_USER
-from django.core.mail import send_mail
+from django.db.models import Prefetch
 from django.utils import timezone
-from projects.models.project_model import Project
 from tasks.models import Task, TaskSubscriber
 
 
@@ -32,32 +31,17 @@ def check_deadline():
 
 @shared_task
 def send_deadline_notification(task_id):
-    try:
-        task = Task.objects.get(id=task_id)
-        subscribers = TaskSubscriber.objects.filter(task=task)
-        ses_client = SesManager.get_ses_client()
+    task = Task.objects.prefetch_related(
+        Prefetch("subscribers", queryset=TaskSubscriber.objects.select_related("user"))
+    ).get(id=task_id)
 
-        for subscriber in subscribers:
-            subject = f'Напоминание: Дедлайн задачи "{task.title}"'
-            message = f"""
-            Задача "{task.title}" приближается к дедлайну!
-            Осталось времени: 1 час
-            Описание: {task.description}
-            Проект: {task.project.title}
-            """
-            try:
-                ses_client.send_email(
-                    Source=EMAIL_HOST_USER,
-                    Destination={
-                        "ToAddresses": ["nikitamaslovskiy999@gmail.com"]
-                    },  # user.mail
-                    Message={
-                        "Subject": {"Data": subject},
-                        "Body": {"Text": {"Data": message}},
-                    },
-                )
-            except ClientError as e:
-                print(f"SES Error: {e.response['Error']['Message']}")
+    for subscriber in task.subscribers.all():
 
-    except Exception as e:
-        print(f"Ошибка отправки уведомления: {e}")
+        template_data = deadline_template_data(task)
+
+        ses_manager.send_templated_email(
+            source=EMAIL_HOST_USER,
+            destination=EMAIL_HOST_USER,  # subscriber.user.email
+            template_name="DeadlineNotificationTemplate",
+            template_data=template_data,
+        )
