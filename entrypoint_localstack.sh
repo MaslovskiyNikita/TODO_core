@@ -2,6 +2,8 @@
 
 docker-entrypoint.sh &
 
+sleep 10
+
 awslocal ses verify-email-identity --email-address "$EMAIL_HOST_USER"
 
 echo "Creating SES templates..."
