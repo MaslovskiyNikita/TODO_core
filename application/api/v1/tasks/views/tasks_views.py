@@ -14,6 +14,7 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from tasks.celery_tasks.status import send_new_status
 from tasks.models.task_model import Task, TaskSubscriber
 
 
@@ -67,7 +68,14 @@ class TaskViews(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_update(self, serializer):
+        task = self.get_object()
+
         due_date = serializer.validated_data.get("due_date")
+        new_status = serializer.validated_data.get("status")
+
+        if task.status != new_status:
+            send_new_status(task.title, str(task.owner))
+
         if due_date != None:
             serializer.validated_data["notification_sent"] = False
         serializer.save()
