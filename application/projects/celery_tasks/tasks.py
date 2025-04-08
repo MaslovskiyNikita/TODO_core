@@ -1,12 +1,10 @@
-from auth.requsts_to_auth.users_mail import get_users_email
+from auth.requsts_to_auth.users_mail import user_managment_client
 from aws.ses_manager import ses_manager
 from aws.templates.project_invitation import project_invitation_template
-from botocore.exceptions import ClientError
 from celery import shared_task
 from core.celery_core import app
 from core.settings import EMAIL_HOST_USER
 from django.core.mail import send_mail
-from projects.models.project_model import Project
 
 
 @shared_task  # type: ignore[misc]
@@ -16,7 +14,7 @@ def send_project_invitation_email(member_id, project_name, project_owner) -> Non
         project_name=project_name, project_owner=project_owner
     )
 
-    user_email = get_users_email(member_id)
+    user_email = user_managment_client.get_users_email(member_id)
 
     ses_manager.send_templated_email(
         source=EMAIL_HOST_USER,

@@ -173,3 +173,7 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 60,
     },
 }
+
+# Auth service
+
+AUTH_HOST = os.getenv("AUTH_HOST")
