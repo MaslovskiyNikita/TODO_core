@@ -23,6 +23,7 @@ redis = "^5.2.1"
 celery = "^5.4.0"
 django-celery-results = "^2.5.1"
 boto3 = "^1.37.26"
+types-requests = "^2.32.0.20250328"
 
 
 [tool.poetry.group.dev.dependencies]

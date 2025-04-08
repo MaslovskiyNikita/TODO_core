@@ -16,7 +16,7 @@ class SesManager:
     def send_templated_email(self, source, destination, template_name, template_data):
         self.client.send_templated_email(
             Source=source,
-            Destination={"ToAddresses": [destination]},
+            Destination={"ToAddresses": destination},
             Template=template_name,
             TemplateData=json.dumps(template_data),
         )

@@ -1,3 +1,4 @@
+from auth.requsts_to_auth.users_mail import get_users_email
 from aws.ses_manager import ses_manager
 from aws.templates.project_invitation import project_invitation_template
 from botocore.exceptions import ClientError
@@ -15,9 +16,11 @@ def send_project_invitation_email(member_id, project_name, project_owner) -> Non
         project_name=project_name, project_owner=project_owner
     )
 
+    user_email = get_users_email(member_id)
+
     ses_manager.send_templated_email(
         source=EMAIL_HOST_USER,
-        destination=EMAIL_HOST_USER,
+        destination=user_email,
         template_name="InviteNotificationTemplate",
         template_data=template_data,
     )

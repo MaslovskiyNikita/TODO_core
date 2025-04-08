@@ -1,9 +1,9 @@
 import json
 from datetime import timedelta
 
+from auth.requsts_to_auth.users_mail import get_users_email
 from aws.ses_manager import ses_manager
 from aws.templates.deadline_notification import deadline_template_data
-from botocore.exceptions import ClientError
 from celery import shared_task
 from core.settings import EMAIL_HOST_USER
 from django.db.models import Prefetch
@@ -35,13 +35,15 @@ def send_deadline_notification(task_id):
         Prefetch("subscribers", queryset=TaskSubscriber.objects.select_related("user"))
     ).get(id=task_id)
 
+    users_email = get_users_email(task.subscribers.user)  # task.subscribers.user.mail
+
     for subscriber in task.subscribers.all():
 
         template_data = deadline_template_data(task)
 
         ses_manager.send_templated_email(
             source=EMAIL_HOST_USER,
-            destination=EMAIL_HOST_USER,  # subscriber.user.email
+            destination=users_email,  # subscriber.user.email
             template_name="DeadlineNotificationTemplate",
             template_data=template_data,
         )
