@@ -1,0 +1,5 @@
+{
+    "TemplateName": "StatusNotificationTemplate",
+    "SubjectPart": " \"{{title}}\"",
+    "HtmlPart": "<h1>Изменения статуса \"{{title}}\"!</h1><<p>Описание: {{description}}</p><p>Проект: {{project_title}}</p>"
+}

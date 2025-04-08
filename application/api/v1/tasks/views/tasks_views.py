@@ -1,3 +1,6 @@
+import datetime
+from datetime import timedelta
+
 from api.v1.filters.filters import TaskFilter
 from api.v1.permissions.permissions import IsUserAdmin, IsUserOwner
 from api.v1.tasks.permissions import HasTasksPermissions
@@ -5,11 +8,13 @@ from api.v1.tasks.serializers.subscriber import TaskSubscriberSerializer
 from api.v1.tasks.serializers.task import TaskSerializer
 from auth.choices.roles import Role
 from django.db.models import Q
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from tasks.celery_tasks.status import send_new_status
 from tasks.models.task_model import Task, TaskSubscriber
 
 
@@ -40,6 +45,11 @@ class TaskViews(viewsets.ModelViewSet):
                 | Q(owner=self.request.user_data.uuid)
             )
 
+    def get_permissions(self):
+        permissions_classes = self.permission_class_by_action.get(self.action, [])
+
+        return [permission() for permission in permissions_classes]
+
     @action(detail=True, methods=["post"], url_path="subscribers")
     def subscribe_on_task(self, request, pk=None):
 
@@ -57,10 +67,18 @@ class TaskViews(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def get_permissions(self):
-        permissions_classes = self.permission_class_by_action.get(self.action, [])
+    def perform_update(self, serializer):
+        task = self.get_object()
 
-        return [permission() for permission in permissions_classes]
+        due_date = serializer.validated_data.get("due_date")
+        new_status = serializer.validated_data.get("status")
+
+        if task.status != new_status:
+            send_new_status(task.title, str(task.owner))
+
+        if due_date != None:
+            serializer.validated_data["notification_sent"] = False
+        serializer.save()
 
     def perform_destroy(self, instance):
         instance.is_archived = True

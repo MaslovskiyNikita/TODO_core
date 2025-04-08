@@ -1,0 +1,5 @@
+{
+    "TemplateName": "DeadlineNotificationTemplate",
+    "SubjectPart": "Напоминание: Дедлайн задачи \"{{task_title}}\"",
+    "HtmlPart": "<h1>Задача \"{{task_title}}\" приближается к дедлайну!</h1><p>Осталось времени: {{time_left}}</p><p>Описание: {{description}}</p><p>Проект: {{project_title}}</p>"
+}

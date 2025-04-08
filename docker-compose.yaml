@@ -1,10 +1,6 @@
-
-
 services:
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile  
+    build: .
     command: ["./entrypoint.sh"]
     volumes:
       - .:/app
@@ -17,20 +13,67 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      localstack:
+        condition: service_started
+
   db:
     image: postgres:16
     env_file:
       - .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    restart: always
-    ports:
-    - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d $POSTGRES_DB -U $POSTGRES_USER"]
       interval: 5s
       timeout: 10s
       retries: 5
+
+  redis:
+    image: redis:7.0
+    env_file:
+      - .env
+
+  celery:
+    build: .
+    command: poetry run celery -A core worker --loglevel=info -E
+    working_dir: /app/application
+    env_file:
+      - .env
+    environment:
+      - PYTHONPATH=/app/application      
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+
+  celery-beat:
+    build: .
+    command: poetry run celery -A core beat --loglevel=info
+    working_dir: /app/application
+    env_file:
+      - .env
+    environment:
+      - PYTHONPATH=/app/application      
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app    
+
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+      - "4510-4559:4510-4559"
+    entrypoint: /app/entrypoint_localstack.sh
+    env_file:
+      - .env
+    volumes:
+      - ./application/aws/ses_templates:/app/ses_templates 
+      - ./entrypoint_localstack.sh:/app/entrypoint_localstack.sh
+    environment:  
+      - TEMPLATES_DIR=/app/ses_templates
 
 volumes:
   postgres_data:

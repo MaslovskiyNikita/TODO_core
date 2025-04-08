@@ -1,0 +1,5 @@
+{
+    "TemplateName": "InviteNotificationTemplate",
+    "SubjectPart": " \"{{title}}\"",
+    "HtmlPart": "<h1>Приглашаем вас в проект \"{{title}}\"!</h1><<p>Описание: {{description}}</p><p>Проект: {{project_title}}</p>"
+}

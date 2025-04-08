@@ -7,6 +7,7 @@ from api.v1.projects.serializers.project_serializer import ProjectSerializer
 from auth.choices.roles import Role
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from projects.celery_tasks.tasks import send_project_invitation_email
 from projects.models import Project, ProjectMember
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -68,6 +69,11 @@ class ProjectViewSet(viewsets.ModelViewSet):
         serializer = ProjectMemberSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        send_project_invitation_email.delay(
+            str(user_uuid), str(project.name), str(project.owner)
+        )
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @members_detail.mapping.delete
