@@ -1,7 +1,7 @@
 import json
 from datetime import timedelta
 
-from auth.requsts_to_auth.users_mail import user_managment_client
+from auth.requsts_to_auth.users_mail import UserManagementClient
 from aws.ses_manager import ses_manager
 from aws.templates.deadline_notification import deadline_template_data
 from celery import shared_task
@@ -35,7 +35,7 @@ def send_deadline_notification(task_id):
         Prefetch("subscribers", queryset=TaskSubscriber.objects.select_related("user"))
     ).get(id=task_id)
 
-    users_email = user_managment_client.get_users_email(
+    users_email = UserManagementClient().get_users_email(
         task.subscribers.user
     )  # task.subscribers.user.mail
 

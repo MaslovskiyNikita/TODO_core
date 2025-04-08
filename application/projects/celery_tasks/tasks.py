@@ -1,4 +1,4 @@
-from auth.requsts_to_auth.users_mail import user_managment_client
+from auth.requsts_to_auth.users_mail import UserManagementClient
 from aws.ses_manager import ses_manager
 from aws.templates.project_invitation import project_invitation_template
 from celery import shared_task
@@ -14,7 +14,7 @@ def send_project_invitation_email(member_id, project_name, project_owner) -> Non
         project_name=project_name, project_owner=project_owner
     )
 
-    user_email = user_managment_client.get_users_email(member_id)
+    user_email = UserManagementClient().get_users_email(member_id)
 
     ses_manager.send_templated_email(
         source=EMAIL_HOST_USER,

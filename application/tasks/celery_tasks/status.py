@@ -1,4 +1,4 @@
-from auth.requsts_to_auth.users_mail import user_managment_client
+from auth.requsts_to_auth.users_mail import UserManagementClient
 from aws.ses_manager import ses_manager
 from aws.templates.status_notification import status_template
 from celery import shared_task
@@ -10,7 +10,7 @@ def send_new_status(task_name, task_owner):
 
     template_data = status_template(task_name, task_owner)
 
-    user_email = user_managment_client.get_users_email(
+    user_email = UserManagementClient().get_users_email(
         task_owner
     )  # subscriber.user.email
 

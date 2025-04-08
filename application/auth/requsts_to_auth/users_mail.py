@@ -3,19 +3,17 @@ from core.settings import AUTH_HOST, EMAIL_HOST_USER
 
 
 class UserManagementClient:
-    def get_users_email(self, user_ids):
+    def __init__(self):
+        self.link = AUTH_HOST + "api/users/emails"
+
+    def get_users_email(self, user_ids: list[str]) -> list[str]:
         """
 
-        auth_link = AUTH_HOST + "api/users/search"
-
-        response = requests.post(
-            auth_link,
-            json={"user_ids": user_ids},
+        response = requests.get(
+            self.link,
+            params={"user_ids": user_ids},
         )
 
-        users = [user["email"] for user in response.json()["users"]]
+        users_emails = response.json()["emails"]
         """
         return [EMAIL_HOST_USER]  # users
-
-
-user_managment_client = UserManagementClient()
