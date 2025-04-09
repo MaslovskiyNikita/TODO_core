@@ -6,6 +6,7 @@ permissions_on_action = {
     "create": PermissionPool.PROJECT_CREATE.value,
     "read": PermissionPool.PROJECT_READ.value,
     "update": PermissionPool.PROJECT_UPDATE.value,
+    "update_partial": PermissionPool.PROJECT_UPDATE.value,
     "destroy": PermissionPool.PROJECT_DESTROY.value,
     "add_member": PermissionPool.PROJECT_ADD_MEMBER.value,
     "put_member": PermissionPool.PROJECT_UPDATE_MEMBER.value,
@@ -19,6 +20,6 @@ class HasProjectsPermissions(BasePermission):
         if hasattr(view, "action"):
             return any(
                 perm in request.user_data.permissions
-                for perm in permissions_on_action.get(view.action)
+                for perm in permissions_on_action.get(view.action, [])
             )
         return False

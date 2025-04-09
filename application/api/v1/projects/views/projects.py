@@ -1,4 +1,4 @@
-from api.v1.permissions.permissions import IsUserAdmin, IsUserOwner
+from api.v1.permissions.permissions import IsAuthenticated, IsUserAdmin, IsUserOwner
 from api.v1.projects.permissions import HasProjectsPermissions
 from api.v1.projects.serializers.project_member_serializer import (
     ProjectMemberSerializer,
@@ -19,6 +19,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
 
     permission_class_by_action = {
+        "create": [IsAuthenticated],
         "update": [IsUserOwner | HasProjectsPermissions | IsUserAdmin],
         "partial_update": [HasProjectsPermissions | IsUserAdmin | IsUserOwner],
         "destroy": [HasProjectsPermissions | IsUserAdmin | IsUserOwner],

@@ -21,7 +21,9 @@ def test_create_subscriber(
 ):
     client = request.getfixturevalue(client_fixture_name)
     data = {"user": str(uuid.uuid4())}
-    response = client.post(f"/api/v1/tasks/{task.id}/subscribers/", data=data)
+    response = client.post(
+        f"/api/v1/tasks/{task.id}/subscribers/", data=data, format="json"
+    )
     assert response.status_code == expected_status
 
 
@@ -39,5 +41,5 @@ def test_failed_create_task(
 ):
     client = request.getfixturevalue(client_fixture_name)
     data: dict = {}
-    response = client.post("/api/v1/tasks/", data=data)
+    response = client.post("/api/v1/tasks/", data=data, format="json")
     assert response.status_code == expected_status

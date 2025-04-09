@@ -30,10 +30,9 @@ def test_create_task(
         "status": "asdasd",
         "due_date": datetime.datetime.now().isoformat(),
         "project": project.id,
-        "owner": str(uuid.uuid4()),
         "assigned_to": str(uuid.uuid4()),
     }
-    response = client.post("/api/v1/tasks/", data=data)
+    response = client.post("/api/v1/tasks/", data=data, format="json")
     assert response.status_code == expected_status
 
     if expected_status == status.HTTP_201_CREATED:
@@ -55,5 +54,5 @@ def test_failed_create_task(
 ):
     client = request.getfixturevalue(client_fixture_name)
     data: dict = {}
-    response = client.post("/api/v1/tasks/", data=data)
+    response = client.post("/api/v1/tasks/", data=data, format="json")
     assert response.status_code == expected_status
