@@ -1,4 +1,9 @@
-from api.v1.permissions.permissions import IsAuthenticated, IsUserAdmin, IsUserOwner
+from api.v1.permissions.permissions import (
+    IsAuthenticated,
+    IsUserAdmin,
+    IsUserOwner,
+    IsUserRedactor,
+)
 from api.v1.projects.permissions import HasProjectsPermissions
 from api.v1.projects.serializers.project_member_serializer import (
     ProjectMemberSerializer,
@@ -19,9 +24,12 @@ class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
 
     permission_class_by_action = {
+        "list": [IsAuthenticated],
         "create": [IsAuthenticated],
-        "update": [IsUserOwner | HasProjectsPermissions | IsUserAdmin],
-        "partial_update": [HasProjectsPermissions | IsUserAdmin | IsUserOwner],
+        "update": [IsUserOwner | HasProjectsPermissions | IsUserAdmin | IsUserRedactor],
+        "partial_update": [
+            HasProjectsPermissions | IsUserAdmin | IsUserOwner | IsUserRedactor
+        ],
         "destroy": [HasProjectsPermissions | IsUserAdmin | IsUserOwner],
         "add_member": [IsUserOwner | IsUserAdmin | HasProjectsPermissions],
         "put_member": [IsUserOwner | IsUserAdmin | HasProjectsPermissions],
@@ -45,9 +53,12 @@ class ProjectViewSet(viewsets.ModelViewSet):
         permissions_classes = self.permission_class_by_action.get(self.action, [])
         return [permissions() for permissions in permissions_classes]
 
-    @action(methods=["get"], detail=False, url_path="members")
-    def list_members(self, request):
-        return ProjectMember.objects.all()
+    @action(methods=["get"], detail=True, url_path="members_list")
+    def list_members(self, request, pk=None):
+        project = self.get_object()
+        data = ProjectMember.objects.filter(project=project)
+        serializer = ProjectMemberSerializer(data, many=True)
+        return Response(serializer.data)
 
     @action(methods=[], detail=True, url_path="members")
     def members(self, request, pk):

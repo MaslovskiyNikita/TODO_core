@@ -32,6 +32,5 @@ class JWTAuthenticationMiddleware:
                 return JsonResponse({"detail": "Token has expired."}, status=401)
             except jwt.InvalidTokenError:
                 return JsonResponse({"detail": "Invalid token."}, status=401)
-
         response = self.get_response(request)
         return response

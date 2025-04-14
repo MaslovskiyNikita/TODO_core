@@ -31,13 +31,9 @@ def check_deadline():
 
 @shared_task
 def send_deadline_notification(task_id):
-    task = Task.objects.prefetch_related(
-        Prefetch("subscribers", queryset=TaskSubscriber.objects.select_related("user"))
-    ).get(id=task_id)
+    task = Task.objects.prefetch_related("subscribers").get(id=task_id)
 
-    users_email = UserManagementClient().get_users_email(
-        task.subscribers.user
-    )  # task.subscribers.user.mail
+    users_email = UserManagementClient().get_users_email()  # task.subscribers.user.mail
 
     for subscriber in task.subscribers.all():
 

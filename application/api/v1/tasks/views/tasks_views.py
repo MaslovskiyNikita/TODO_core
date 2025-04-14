@@ -32,6 +32,7 @@ class TaskViews(viewsets.ModelViewSet):
             IsUserOwner | IsAuthenticated | HasTasksPermissions | IsUserAdmin
         ],
         "perform_destroy": [HasTasksPermissions | IsUserAdmin | IsUserOwner],
+        "delete_subscriber": [],
     }
 
     def get_queryset(self):
@@ -67,8 +68,19 @@ class TaskViews(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    @action(detail=True, methods=["delete"], url_path="subscribers")
+    def delete_subscriber(self, request, pk=None):
+        task = self.get_object()
+        subscriber = TaskSubscriber.objects.get(user=request.user_data.uuid, task=task)
+        subscriber.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     def create(self, request, *args, **kwargs):
         request.data["owner"] = request.user_data.uuid
+
+        if request.data["due_date"] <= str(datetime.datetime.now().time()):
+            return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
